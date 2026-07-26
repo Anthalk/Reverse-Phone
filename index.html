@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reverse Phone — le téléphone arabe à l'envers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --grad-a:#ffe14d;
+    --grad-b:#ffb629;
+    --grad-c:#ff8a3d;
+    --grad-d:#ff5d5d;
+    --ink:#3a2606;
+    --deep:#3a2606;
+    --shadow:#2a1b04;
+    --panel:rgba(58,38,6,.85);
+    --panel-line:rgba(255,255,255,.16);
+    --mint:#2ed9a3;
+    --mint-deep:#0e6b4c;
+    --sun:#ffd23f;
+    --flame:#e0431f;
+    --rec:#ff4d5e;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html{min-height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Nunito',sans-serif;
+    color:var(--ink);
+    background:linear-gradient(135deg,var(--grad-a) 0%,var(--grad-b) 40%,var(--grad-c) 72%,var(--grad-d) 100%);
+    background-attachment:fixed;
+    display:flex;justify-content:center;
+    padding:36px 16px 72px;
+    position:relative;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;
+    background-image:radial-gradient(rgba(58,38,6,.09) 1.5px, transparent 1.6px);
+    background-size:22px 22px;
+    mask-image:linear-gradient(115deg, black 0%, transparent 45%, transparent 60%, black 100%);
+    -webkit-mask-image:linear-gradient(115deg, black 0%, transparent 45%, transparent 60%, black 100%);
+  }
+  .app{width:100%;max-width:540px;position:relative;}
+  h1,h2,h3,.roomcode,.ticket,button{font-family:'Baloo 2',cursive;}
+  h1,h2,h3{margin:0;font-weight:800;}
+  h2{text-shadow:0 3px 0 rgba(42,27,4,.15);}
+
+  .eyebrow{
+    font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--flame);margin-bottom:6px;
+  }
+  .title-flip{
+    font-family:'Baloo 2',cursive;font-weight:800;
+    font-size:52px;line-height:1;letter-spacing:.01em;
+    color:var(--ink);
+    text-shadow:0 4px 0 rgba(42,27,4,.18);
+  }
+  .title-flip .mirror{
+    display:inline-block;transform:scaleX(-1);color:var(--flame);
+    text-shadow:0 4px 0 rgba(122,30,10,.35);
+  }
+  .subtitle{color:rgba(58,38,6,.82);font-size:14.5px;font-weight:700;margin-top:12px;line-height:1.55;}
+
+  .card{
+    background:var(--panel);
+    border:3px solid var(--panel-line);
+    border-radius:22px;
+    padding:24px;
+    margin-top:22px;
+    box-shadow:0 8px 0 rgba(42,27,4,.3);
+    backdrop-filter:blur(6px);
+    color:var(--white);
+  }
+
+  label{
+    display:block;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--sun);margin-bottom:7px;
+  }
+  input[type=text]{
+    width:100%;
+    background:rgba(255,255,255,.14);
+    border:3px solid rgba(255,255,255,.28);
+    color:var(--white);
+    padding:13px 15px;border-radius:14px;
+    font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;
+    margin-bottom:16px;
+    transition:border-color .15s, background .15s;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--mint);background:rgba(255,255,255,.2);}
+  input[type=text]::placeholder{color:rgba(255,255,255,.45);font-weight:700;}
+
+  .row{display:flex;gap:12px;}
+  .row>*{flex:1;}
+
+  button{
+    font-weight:800;font-size:15.5px;letter-spacing:.01em;
+    border:3px solid var(--deep);
+    background:var(--white);color:var(--deep);
+    padding:13px 18px;border-radius:16px;cursor:pointer;
+    box-shadow:0 5px 0 var(--shadow);
+    transition:transform .08s, box-shadow .08s, background .15s;
+  }
+  button:hover{background:#fff3d6;}
+  button:active{transform:translateY(4px);box-shadow:0 1px 0 var(--shadow);}
+  button:focus-visible{outline:3px solid var(--flame);outline-offset:2px;}
+  button:disabled{
+    opacity:.45;cursor:not-allowed;transform:none;box-shadow:0 5px 0 var(--shadow);
+  }
+  button.primary{
+    background:var(--mint);border-color:var(--mint-deep);color:#063322;
+    box-shadow:0 5px 0 var(--mint-deep);width:100%;
+  }
+  button.primary:hover{background:#4beab5;}
+  button.primary:active{box-shadow:0 1px 0 var(--mint-deep);}
+  button.primary:disabled{box-shadow:0 5px 0 var(--mint-deep);}
+  button.ghost{
+    background:transparent;border-color:rgba(58,38,6,.55);color:var(--ink);
+    box-shadow:0 5px 0 rgba(42,27,4,.25);
+  }
+  button.ghost:hover{background:rgba(58,38,6,.08);}
+  .card button.ghost{
+    border-color:rgba(255,255,255,.55);color:var(--white);
+    box-shadow:0 5px 0 rgba(20,12,2,.5);
+  }
+  .card button.ghost:hover{background:rgba(255,255,255,.12);}
+  button.rec-active{
+    background:var(--rec);border-color:#8f1e2a;color:#fff;
+    box-shadow:0 5px 0 #8f1e2a;
+    animation:pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{filter:brightness(1);}50%{filter:brightness(1.25);}}
+  @media (prefers-reduced-motion: reduce){
+    button.rec-active{animation:none;}
+  }
+
+  .players{list-style:none;margin:0;padding:0;}
+  .players li{
+    display:flex;align-items:center;gap:12px;padding:11px 0;
+    border-bottom:2px dashed rgba(255,255,255,.18);
+    font-size:15px;font-weight:800;
+  }
+  .players li:last-child{border-bottom:none;}
+  .dot{width:12px;height:12px;border-radius:50%;background:var(--mint);flex-shrink:0;border:2px solid rgba(0,0,0,.25);}
+  .dot.you{background:var(--sun);}
+
+  .roomcode{
+    font-weight:800;font-size:44px;letter-spacing:.14em;color:var(--ink);
+    text-shadow:0 4px 0 rgba(42,27,4,.18);
+  }
+  .hint{font-size:13px;font-weight:700;color:rgba(58,38,6,.78);line-height:1.5;margin-top:10px;}
+  .card .hint{color:rgba(255,255,255,.82);}
+  .small{font-size:12px;font-weight:700;color:rgba(58,38,6,.55);}
+  .error{color:#ffd4d8;background:rgba(143,30,42,.55);border-radius:10px;font-weight:800;font-size:13px;margin-top:10px;padding:0;}
+  .error:not(:empty){padding:8px 12px;}
+  .center{text-align:center;}
+
+  .step{
+    display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;padding-bottom:20px;
+    border-bottom:2px dashed rgba(255,255,255,.18);
+  }
+  .step:last-of-type{border:none;margin-bottom:0;padding-bottom:0;}
+  .step-num{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;
+    background:var(--sun);color:var(--deep);
+    width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    border:3px solid var(--deep);box-shadow:0 3px 0 var(--shadow);
+    flex-shrink:0;
+  }
+  .step-body{flex:1;min-width:0;}
+  .step-title{font-family:'Baloo 2',cursive;font-size:16.5px;font-weight:800;margin-bottom:4px;}
+  .step-desc{font-size:13px;font-weight:700;color:rgba(255,255,255,.78);line-height:1.5;margin-bottom:12px;}
+  .step.locked{opacity:.35;pointer-events:none;filter:saturate(.4);}
+  .step.done .step-title{color:var(--mint);}
+
+  audio{width:100%;height:40px;margin-top:8px;border-radius:20px;}
+
+  .badge{
+    display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+    padding:5px 14px;border-radius:20px;
+    border:2px solid rgba(58,38,6,.45);color:rgba(58,38,6,.85);
+  }
+  .badge.yourturn{background:var(--ink);border-color:var(--ink);color:var(--sun);box-shadow:0 3px 0 rgba(42,27,4,.3);}
+
+  .ticket-strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;}
+  .ticket{
+    background:var(--white);color:var(--deep);border:3px solid var(--deep);border-radius:14px;
+    padding:10px 15px;font-weight:800;font-size:16px;
+    min-width:56px;text-align:center;
+    box-shadow:0 4px 0 var(--shadow);
+    transform:rotate(-1.2deg);
+  }
+  .ticket:nth-child(even){transform:rotate(1.4deg);}
+  .ticket .who{
+    display:block;font-family:'Nunito',sans-serif;font-weight:800;font-size:9.5px;letter-spacing:.06em;
+    text-transform:uppercase;color:#a58b52;margin-top:2px;
+  }
+
+  .chain-label{
+    font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--sun);margin:24px 0 10px;
+  }
+  .divider{height:0;border-top:2px dashed rgba(58,38,6,.35);margin:24px 0;}
+  .card .divider{border-top-color:rgba(255,255,255,.25);}
+  a.link-btn{color:var(--flame);text-decoration:underline;cursor:pointer;font-size:12px;}
+
+  .player{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(255,255,255,.12);
+    border:2px solid rgba(255,255,255,.2);
+    border-radius:999px;
+    padding:6px 14px 6px 6px;
+    margin-top:8px;
+  }
+  .pbtn{
+    width:38px;height:38px;border-radius:50%;padding:0;
+    font-size:14px;line-height:1;
+    background:var(--sun);border:3px solid var(--deep);color:var(--deep);
+    box-shadow:0 3px 0 var(--shadow);
+    flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  }
+  .pbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--shadow);}
+  .pbar{
+    flex:1;height:10px;border-radius:999px;
+    background:rgba(0,0,0,.35);overflow:hidden;
+    border:2px solid rgba(255,255,255,.12);
+  }
+  .pfill{height:100%;width:0%;background:var(--mint);border-radius:999px;transition:width .15s linear;}
+  .ptime{font-size:12px;font-weight:800;color:rgba(255,255,255,.85);min-width:34px;text-align:right;}
+
+  .badge.danger{background:var(--rec);border-color:#8f1e2a;color:#fff;animation:pulse 1s ease-in-out infinite;}
+
+  .net-banner{
+    position:fixed;top:0;left:0;right:0;z-index:60;
+    background:var(--rec);color:#fff;
+    font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;
+    text-align:center;padding:12px 16px;
+    border-bottom:3px solid #8f1e2a;
+  }
+
+  .go-overlay{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(42,27,4,.72);
+    display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(3px);
+  }
+  .go-num{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:110px;
+    color:var(--sun);text-shadow:0 6px 0 rgba(0,0,0,.4);
+  }
+  .go-num.pop{animation:gopop .55s ease;}
+  @keyframes gopop{0%{transform:scale(.4);opacity:0;}60%{transform:scale(1.15);opacity:1;}100%{transform:scale(1);}}
+  @media (prefers-reduced-motion: reduce){.go-num.pop{animation:none;}.badge.danger{animation:none;}}
+</style>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<div id="app" class="app"></div>
+
+<script>
+/* ====================== AUDIO HELPERS ====================== */
+let audioCtx = null;
+function getCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// The mic stream is opened ONCE on first use and kept alive for the whole
+// session — closing it after each clip would make the browser re-prompt for
+// permission every time on file:// pages (treated as unique origins).
+let micStream = null;
+async function ensureMic(){
+  if(!micAvailable()){
+    throw new Error("micro bloqué — ouvre le jeu via une adresse https (pas un fichier local)");
+  }
+  if(!micStream || !micStream.active){
+    micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+  }
+  return micStream;
+}
+
+// Recordings are capped at the remaining turn time (plus a safety fallback),
+// so a clip can never outlive its turn.
+async function recordWithTimer(handle, statusId){
+  let ms = 120000;
+  if(turnTimer.deadline){
+    ms = Math.max(1000, turnTimer.deadline - Date.now());
+  }
+  return await recordAudio(handle, ms);
+}
+
+async function recordAudio(streamHandle, ms){
+  const stream = await ensureMic();
+  return new Promise((resolve, reject)=>{
+    try{
+      const chunks = [];
+      const mr = new MediaRecorder(stream);
+      mr.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+      mr.onstop = ()=>{
+        resolve(new Blob(chunks, {type: mr.mimeType || 'audio/webm'}));
+      };
+      mr.onerror = e=>reject(e.error||e);
+      mr.start();
+      streamHandle.stopFn = ()=>mr.state!=='inactive' && mr.stop();
+      if(ms) setTimeout(()=>streamHandle.stopFn(), ms);
+    }catch(err){reject(err);}
+  });
+}
+
+async function blobToAudioBuffer(blob){
+  const arrayBuf = await blob.arrayBuffer();
+  const ctx = getCtx();
+  return await ctx.decodeAudioData(arrayBuf.slice(0));
+}
+
+function reverseBuffer(buffer){
+  const ctx = getCtx();
+  const out = ctx.createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+  for(let ch=0; ch<buffer.numberOfChannels; ch++){
+    const src = buffer.getChannelData(ch);
+    const dst = out.getChannelData(ch);
+    for(let i=0;i<src.length;i++) dst[i] = src[src.length-1-i];
+  }
+  return out;
+}
+
+function audioBufferToWavBase64(buffer){
+  const numCh = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const length = buffer.length * numCh * 2 + 44;
+  const bufOut = new ArrayBuffer(length);
+  const view = new DataView(bufOut);
+  function writeStr(off, str){ for(let i=0;i<str.length;i++) view.setUint8(off+i, str.charCodeAt(i)); }
+  writeStr(0,'RIFF'); view.setUint32(4, length-8, true); writeStr(8,'WAVE');
+  writeStr(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true); view.setUint32(24,sampleRate,true);
+  view.setUint32(28, sampleRate*numCh*2, true); view.setUint16(32, numCh*2, true); view.setUint16(34,16,true);
+  writeStr(36,'data'); view.setUint32(40, length-44, true);
+  let offset=44;
+  const channels=[]; for(let ch=0;ch<numCh;ch++) channels.push(buffer.getChannelData(ch));
+  for(let i=0;i<buffer.length;i++){
+    for(let ch=0;ch<numCh;ch++){
+      let s = Math.max(-1, Math.min(1, channels[ch][i]));
+      s = s<0 ? s*0x8000 : s*0x7FFF;
+      view.setInt16(offset, s, true); offset+=2;
+    }
+  }
+  let binary=''; const bytes=new Uint8Array(bufOut);
+  const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk) binary += String.fromCharCode.apply(null, bytes.subarray(i,i+chunk));
+  return 'data:audio/wav;base64,' + btoa(binary);
+}
+
+async function reverseBlobToWavB64(blob){
+  const buf = await blobToAudioBuffer(blob);
+  const rev = reverseBuffer(buf);
+  return audioBufferToWavBase64(rev);
+}
+async function blobToCleanWavB64(blob){
+  const buf = await blobToAudioBuffer(blob);
+  return audioBufferToWavBase64(buf);
+}
+
+/* --------- Custom themed audio player (replaces native <audio>) --------- */
+function fmtTime(s){ s = Math.floor(s||0); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+function playerHTML(src){
+  return `<div class="player" data-src="${src}">
+    <button class="pbtn" type="button" aria-label="Lire">▶</button>
+    <div class="pbar"><div class="pfill"></div></div>
+    <span class="ptime">0:00</span>
+  </div>`;
+}
+let sharedAudio = null, activePlayerEl = null;
+function resetActivePlayer(){
+  if(activePlayerEl && document.body.contains(activePlayerEl)){
+    activePlayerEl.querySelector('.pbtn').textContent = '▶';
+  }
+  activePlayerEl = null;
+}
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.pbtn');
+  if(!btn) return;
+  const wrap = btn.closest('.player');
+  if(sharedAudio && activePlayerEl === wrap){
+    if(sharedAudio.paused){ sharedAudio.play(); btn.textContent='⏸'; }
+    else { sharedAudio.pause(); btn.textContent='▶'; }
+    return;
+  }
+  if(sharedAudio){ sharedAudio.pause(); resetActivePlayer(); }
+  sharedAudio = new Audio(wrap.dataset.src);
+  activePlayerEl = wrap;
+  btn.textContent = '⏸';
+  sharedAudio.ontimeupdate = ()=>{
+    if(!document.body.contains(wrap)) return;
+    if(sharedAudio.duration && isFinite(sharedAudio.duration)){
+      wrap.querySelector('.pfill').style.width = (sharedAudio.currentTime / sharedAudio.duration * 100) + '%';
+    }
+    wrap.querySelector('.ptime').textContent = fmtTime(sharedAudio.currentTime);
+  };
+  sharedAudio.onended = ()=>{
+    if(document.body.contains(wrap)){
+      wrap.querySelector('.pfill').style.width = '100%';
+      btn.textContent = '▶';
+    }
+    activePlayerEl = null;
+  };
+  sharedAudio.play();
+});
+
+// Short silence used as placeholder when the turn timer expires
+// before a required clip was recorded.
+function silentWavB64(sec){
+  const ctx = getCtx();
+  const buf = ctx.createBuffer(1, Math.max(1, Math.round(ctx.sampleRate * (sec || 0.4))), ctx.sampleRate);
+  return audioBufferToWavBase64(buf);
+}
+
+// Trim leading/trailing silence from a buffer (simple amplitude threshold,
+// with a small padding kept around the detected speech).
+function trimSilence(buffer, thresh, padMs){
+  thresh = thresh || 0.025;
+  padMs = padMs || 50;
+  const ctx = getCtx();
+  const data = buffer.getChannelData(0);
+  const pad = Math.round(buffer.sampleRate * padMs / 1000);
+  let start = 0, end = data.length - 1;
+  while(start < data.length && Math.abs(data[start]) < thresh) start++;
+  while(end > start && Math.abs(data[end]) < thresh) end--;
+  if(start >= end) return buffer; // all silence — keep as is
+  start = Math.max(0, start - pad);
+  end = Math.min(data.length - 1, end + pad);
+  const out = ctx.createBuffer(1, end - start + 1, buffer.sampleRate);
+  out.getChannelData(0).set(data.subarray(start, end + 1));
+  return out;
+}
+
+// Stitch several data-URL audio clips into one continuous phrase: each clip is
+// silence-trimmed, then joined with a short breath between words.
+async function concatDataUrls(urls){
+  const ctx = getCtx();
+  const buffers = [];
+  for(const u of urls){
+    const resp = await fetch(u);
+    const blob = await resp.blob();
+    buffers.push(trimSilence(await blobToAudioBuffer(blob)));
+  }
+  const gap = Math.round(ctx.sampleRate * 0.08);
+  const totalLen = buffers.reduce((s,b)=>s+b.length, 0) + gap * (buffers.length - 1);
+  const out = ctx.createBuffer(1, totalLen, ctx.sampleRate);
+  const dst = out.getChannelData(0);
+  let offset = 0;
+  for(let i=0;i<buffers.length;i++){
+    const src = buffers[i].getChannelData(0);
+    dst.set(src, offset);
+    offset += buffers[i].length + gap;
+  }
+  return audioBufferToWavBase64(out);
+}
+
+/* ====================== STATE / STORAGE ====================== */
+const myId = 'p_' + Math.random().toString(36).slice(2,10);
+let myName = '';
+let currentRoom = null; // room code
+let pollTimer = null;
+let localState = null;
+
+function roomKey(code){ return 'cadavre-room-' + code; }
+function peerIdFor(code){ return 'envers-cadexq-' + code.toLowerCase(); }
+
+// The game state lives in the HOST's browser tab (in-memory). Guests connect
+// to the host over WebRTC (PeerJS): every state write is sent to the host,
+// which stays the single source of truth and rebroadcasts to everyone.
+// The free public PeerJS server is only used for the initial handshake;
+// game data flows peer-to-peer.
+const memoryStore = {};
+const net = { mode:null, peer:null, conns:[], guestConn:null, cache:null };
+
+function teardownNet(){
+  try{ if(net.peer) net.peer.destroy(); }catch(e){}
+  net.mode=null; net.peer=null; net.conns=[]; net.guestConn=null; net.cache=null;
+  const b = document.getElementById('netBanner'); if(b) b.remove();
+}
+
+function showNetBanner(msg){
+  let b = document.getElementById('netBanner');
+  if(!b){ b = document.createElement('div'); b.id='netBanner'; b.className='net-banner'; document.body.appendChild(b); }
+  b.textContent = msg;
+}
+
+function hostBroadcast(json){
+  net.conns.forEach(c=>{ if(c.open) c.send({t:'state', state: json}); });
+}
+
+function handleHostData(conn, msg){
+  if(!msg || !msg.t || !currentRoom) return;
+  if(msg.t === 'hello'){
+    const v = memoryStore[roomKey(currentRoom)];
+    if(!v) return;
+    const state = JSON.parse(v);
+    if(!state.players.find(p=>p.id===msg.id)){
+      state.players.push({id: msg.id, name: msg.name || 'Joueur'});
+      state.order.push(msg.id);
+    }
+    const json = JSON.stringify(state);
+    memoryStore[roomKey(currentRoom)] = json;
+    hostBroadcast(json);
+    poll();
+  } else if(msg.t === 'write'){
+    memoryStore[roomKey(currentRoom)] = msg.state;
+    hostBroadcast(msg.state);
+    poll();
+  }
+}
+
+async function readRoom(code){
+  if(net.mode === 'guest'){
+    return net.cache ? JSON.parse(net.cache) : null;
+  }
+  const v = memoryStore[roomKey(code)];
+  return v ? JSON.parse(v) : null;
+}
+
+async function writeRoom(code, state){
+  const json = JSON.stringify(state);
+  if(net.mode === 'guest'){
+    net.cache = json; // optimistic local update; host echoes it back
+    if(net.guestConn && net.guestConn.open) net.guestConn.send({t:'write', state: json});
+    return;
+  }
+  memoryStore[roomKey(code)] = json;
+  if(net.mode === 'host') hostBroadcast(json);
+}
+
+function randomCode(){
+  const letters='ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let c=''; for(let i=0;i<4;i++) c+=letters[Math.floor(Math.random()*letters.length)];
+  return c;
+}
+
+function readRounds(){
+  const el = document.getElementById('roundsInput');
+  let n = parseInt(el ? el.value : '6', 10);
+  if(isNaN(n)) n = 6;
+  return Math.max(2, Math.min(20, n));
+}
+
+function readRecSecs(){
+  const el = document.getElementById('recSecsInput');
+  let n = parseInt(el ? el.value : '45', 10);
+  if(isNaN(n)) n = 45;
+  return Math.max(15, Math.min(120, n));
+}
+
+async function createRoom(){
+  if(typeof Peer === 'undefined'){
+    showLandingError("Impossible de charger le module réseau — vérifie ta connexion et recharge la page.");
+    resetLandingButtons(); return;
+  }
+  teardownNet();
+  let attempts = 0;
+  const tryCode = ()=>{
+    const code = randomCode();
+    const peer = new Peer(peerIdFor(code));
+    peer.on('open', ()=>{
+      net.mode = 'host'; net.peer = peer;
+      peer.on('connection', conn=>{
+        net.conns.push(conn);
+        conn.on('data', msg=>handleHostData(conn, msg));
+        conn.on('close', ()=>{ net.conns = net.conns.filter(c=>c!==conn); });
+      });
+      const state = {
+        code, players:[{id:myId,name:myName}], order:[myId],
+        turnIndex:0, phase:'lobby', turns:[], maxTurns: readRounds(), recSeconds: readRecSecs()
+      };
+      memoryStore[roomKey(code)] = JSON.stringify(state);
+      enterRoom(code);
+    });
+    peer.on('error', err=>{
+      if(err && err.type === 'unavailable-id' && attempts < 3){
+        attempts++; try{peer.destroy();}catch(e){} tryCode();
+      } else {
+        showLandingError("Impossible de créer le salon (" + (err && err.type || 'erreur réseau') + "). Réessaie.");
+        try{peer.destroy();}catch(e){}
+        teardownNet(); resetLandingButtons();
+      }
+    });
+  };
+  tryCode();
+}
+
+async function createLocalRoom(numPlayers){
+  teardownNet();
+  net.mode = 'local';
+  let code = randomCode();
+  const players = [{id:myId, name: myName || 'Joueur 1'}];
+  const order = [myId];
+  for(let i=2;i<=numPlayers;i++){
+    const localId = 'local_' + i;
+    players.push({id:localId, name:'Joueur ' + i});
+    order.push(localId);
+  }
+  const state = {
+    code, players, order,
+    turnIndex:0, phase:'playing', turns:[], solo:true, maxTurns: readRounds(), recSeconds: readRecSecs()
+  };
+  await writeRoom(code, state);
+  enterRoom(code);
+}
+
+async function joinRoom(code){
+  code = code.trim().toUpperCase();
+  if(typeof Peer === 'undefined'){
+    showLandingError("Impossible de charger le module réseau — vérifie ta connexion et recharge la page.");
+    resetLandingButtons(); return;
+  }
+  teardownNet();
+  showLandingError('Connexion au salon ' + code + '…');
+  const peer = new Peer();
+  let settled = false;
+  const fail = (msg)=>{
+    if(settled || currentRoom) return;
+    settled = true;
+    showLandingError(msg);
+    try{peer.destroy();}catch(e){}
+    teardownNet(); resetLandingButtons();
+  };
+  peer.on('open', ()=>{
+    const conn = peer.connect(peerIdFor(code), {reliable:true});
+    conn.on('open', ()=>{
+      net.mode='guest'; net.peer=peer; net.guestConn=conn;
+      conn.send({t:'hello', id: myId, name: myName});
+    });
+    conn.on('data', msg=>{
+      if(msg && msg.t === 'state'){
+        net.cache = msg.state;
+        if(!settled){ settled = true; enterRoom(code); }
+        else { poll(); }
+      }
+    });
+    conn.on('close', ()=>{
+      if(currentRoom) showNetBanner("⚠️ On a perdu l'hôte… La partie s'arrête ici.");
+    });
+  });
+  peer.on('error', err=>{
+    fail("Salon introuvable — vérifie le code, et que l'hôte a bien son onglet ouvert.");
+  });
+  setTimeout(()=>fail("Salon introuvable — vérifie le code, et que l'hôte a bien son onglet ouvert."), 10000);
+}
+
+function resetLandingButtons(){
+  const c = document.getElementById('createBtn');
+  if(c){ c.disabled=false; c.textContent='Créer un salon'; }
+  const j = document.getElementById('joinBtn');
+  if(j){ j.disabled=false; j.textContent='Rejoindre le salon'; }
+  const l = document.getElementById('localBtn');
+  if(l){ l.disabled=false; }
+}
+
+function showLandingError(msg){
+  const el = document.getElementById('landingError');
+  if(el) el.textContent = msg;
+}
+
+function enterRoom(code){
+  currentRoom = code;
+  poll();
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(poll, 2200);
+}
+
+let lastRenderedJson = null;
+let isRecording = false;
+
+async function poll(){
+  if(!currentRoom) return;
+  const state = await readRoom(currentRoom);
+  if(!state) return;
+  localState = state;
+  const json = JSON.stringify(state);
+  // Re-render ONLY if the shared state actually changed, and never mid-recording:
+  // re-rendering rebuilds the DOM, which wipes text inputs and recording buttons.
+  if(json === lastRenderedJson || isRecording) return;
+  lastRenderedJson = json;
+  render(roomScreen(state));
+  manageTurnTimer(state);
+}
+
+/* ====================== TURN TIMER ====================== */
+let turnTimer = {key:null, iv:null, deadline:0};
+let submitting = false;
+
+function clearTurnTimer(){
+  if(turnTimer.iv) clearInterval(turnTimer.iv);
+  turnTimer = {key:null, iv:null, deadline:0};
+}
+
+// Called after each render of a game screen: starts the 3-2-1 countdown then
+// the turn clock — once per turn, only for the active player.
+function manageTurnTimer(state){
+  if(!state || (state.phase !== 'playing' && state.phase !== 'closing')){
+    clearTurnTimer(); return;
+  }
+  const idx = state.turnIndex;
+  const activeId = state.order[idx % state.order.length];
+  const mine = state.solo ? true : (activeId === myId);
+  if(!mine){ clearTurnTimer(); return; }
+  const key = state.code + ':' + state.phase + ':' + idx;
+  if(turnTimer.key === key) return; // already running for this turn
+  clearTurnTimer();
+  turnTimer.key = key;
+  startCountdownOverlay(()=>startTurnClock(state));
+}
+
+function startCountdownOverlay(cb){
+  const ov = document.createElement('div');
+  ov.className = 'go-overlay';
+  ov.innerHTML = '<div class="go-num">3</div>';
+  document.body.appendChild(ov);
+  const num = ov.querySelector('.go-num');
+  const seq = ['3','2','1','À toi !'];
+  let i = 0;
+  const step = ()=>{
+    if(i >= seq.length){ ov.remove(); cb(); return; }
+    num.textContent = seq[i];
+    num.classList.remove('pop'); void num.offsetWidth; num.classList.add('pop');
+    i++;
+    setTimeout(step, 700);
+  };
+  step();
+}
+
+function startTurnClock(state){
+  const secs = state.recSeconds || 45;
+  turnTimer.deadline = Date.now() + secs * 1000;
+  const tick = ()=>{
+    const left = Math.max(0, Math.ceil((turnTimer.deadline - Date.now()) / 1000));
+    const chip = document.getElementById('turnTimerChip');
+    if(chip){
+      chip.style.display = 'inline-block';
+      chip.textContent = '⏱ ' + left + ' s';
+      chip.classList.toggle('danger', left <= 5);
+    }
+    if(left <= 0){
+      if(turnTimer.iv) clearInterval(turnTimer.iv);
+      turnTimer.iv = null;
+      forceSubmitCurrentTurn();
+    }
+  };
+  tick();
+  turnTimer.iv = setInterval(tick, 250);
+}
+
+async function waitRecordingSettled(){
+  for(let i=0;i<15;i++){
+    if(!isRecording) return;
+    await new Promise(r=>setTimeout(r,100));
+  }
+}
+
+// Turn timer hit zero: stop any live recording (it is kept), then submit the
+// turn with whatever exists — missing clips become short silences.
+async function forceSubmitCurrentTurn(){
+  if(submitting) return;
+  if(isRecording && streamHandle.stopFn) streamHandle.stopFn();
+  await waitRecordingSettled();
+  const state = localState;
+  if(!state) return;
+  if(state.phase === 'playing' && state.turnIndex === 0) await doSubmitSeed();
+  else if(state.phase === 'playing') await doSubmitTurn();
+  else if(state.phase === 'closing') await doSubmitClosing();
+}
+
+/* ====================== TURN SUBMISSION ====================== */
+async function doSubmitSeed(){
+  if(submitting) return; submitting = true;
+  clearTurnTimer();
+  const btn = document.getElementById('seedSubmitBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Envoi…'; }
+  try{
+    const cleanB64 = seedBlob ? await blobToCleanWavB64(seedBlob) : silentWavB64();
+    const revB64 = seedBlob ? await reverseBlobToWavB64(seedBlob) : cleanB64;
+    const state = await readRoom(currentRoom);
+    const activeId = state.order[state.turnIndex % state.order.length];
+    const activeName = state.players.find(p=>p.id===activeId).name;
+    state.turns.push({playerId:activeId, playerName:activeName, audio:cleanB64, reversedAudio:revB64, attemptRestoredAudio:null});
+    state.turnIndex = 1;
+    if(state.maxTurns && state.turns.length >= state.maxTurns) state.phase = 'closing';
+    await writeRoom(currentRoom, state);
+    seedBlob = null;
+    lastRenderedJson = null;
+  } finally { submitting = false; }
+  poll();
+}
+
+async function doSubmitTurn(){
+  if(submitting) return; submitting = true;
+  clearTurnTimer();
+  const btn = document.getElementById('turnSubmitBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Envoi…'; }
+  try{
+    const cleanB64 = newWordBlob ? await blobToCleanWavB64(newWordBlob) : silentWavB64();
+    const revB64 = newWordBlob ? await reverseBlobToWavB64(newWordBlob) : cleanB64;
+    const perceptionB64 = perceptionBlob ? await blobToCleanWavB64(perceptionBlob) : silentWavB64();
+    const restored = attemptReversedB64 || silentWavB64();
+    const state = await readRoom(currentRoom);
+    const myTurnIdx = state.turnIndex;
+    const activeId = state.order[myTurnIdx % state.order.length];
+    const activeName = state.players.find(p=>p.id===activeId).name;
+    state.turns.push({playerId:activeId, playerName:activeName, audio:cleanB64, reversedAudio:revB64, attemptRestoredAudio:restored, perceptionAudio:perceptionB64});
+    state.turnIndex = myTurnIdx + 1;
+    if(state.maxTurns && state.turns.length >= state.maxTurns) state.phase = 'closing';
+    await writeRoom(currentRoom, state);
+    attemptBlob=null; newWordBlob=null; attemptReversedB64=null; perceptionBlob=null;
+    lastRenderedJson = null;
+  } finally { submitting = false; }
+  poll();
+}
+
+async function doSubmitClosing(){
+  if(submitting) return; submitting = true;
+  clearTurnTimer();
+  const btn = document.getElementById('closingSubmitBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Assemblage…'; }
+  try{
+    const perceptionB64 = perceptionBlob ? await blobToCleanWavB64(perceptionBlob) : silentWavB64();
+    const restored = attemptReversedB64 || silentWavB64();
+    const state = await readRoom(currentRoom);
+    const activeId = state.order[state.turnIndex % state.order.length];
+    const activeName = state.players.find(p=>p.id===activeId).name;
+    state.finalPerception = {playerName:activeName, perceptionAudio:perceptionB64, attemptRestoredAudio:restored};
+    state.phase = 'reveal';
+    await writeRoom(currentRoom, state);
+    attemptBlob=null; attemptReversedB64=null; perceptionBlob=null;
+    lastRenderedJson = null;
+  } finally { submitting = false; }
+  poll();
+}
+
+/* ====================== SCREENS ====================== */
+const app = document.getElementById('app');
+function render(html){ app.innerHTML = html; wireEvents(); }
+
+function micAvailable(){
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+
+function landingScreen(){
+  const micWarning = micAvailable() ? '' : `
+  <div class="card" style="border-color:var(--rec);">
+    <div class="step-title">🎤 Micro inaccessible ici</div>
+    <p class="hint">Ton navigateur bloque le micro parce que la page n'est pas ouverte via une adresse sécurisée (https). C'est le cas quand on ouvre le fichier téléchargé directement, surtout sur téléphone.</p>
+    <p class="hint">Ouvre plutôt le jeu depuis son lien https (celui qu'on t'a partagé) — depuis un fichier téléchargé, le micro reste bloqué, surtout sur téléphone.</p>
+  </div>`;
+  return micWarning + `
+  <div class="eyebrow">Le téléphone arabe… à l'envers</div>
+  <div class="title-flip" id="titleFlip">Reverse <span class="mirror">Phone</span></div>
+  <p class="subtitle">Un mot circule de joueur en joueur, toujours à l'envers. Tu l'écoutes, tu l'imites, tu découvres ce que ça donne remis à l'endroit… puis tu ajoutes le tien. À la fin, on compare ce qui a vraiment été dit avec ce que tout le monde a cru entendre. Spoiler : c'est jamais pareil.</p>
+  <div class="card">
+    <label for="nameInput">Ton prénom</label>
+    <input type="text" id="nameInput" placeholder="Ex. Anthal" maxlength="20">
+    <div class="row">
+      <div>
+        <label for="roundsInput">Nombre de mots</label>
+        <input type="text" id="roundsInput" inputmode="numeric" value="6" maxlength="2">
+      </div>
+      <div>
+        <label for="recSecsInput">Temps par tour (s)</label>
+        <input type="text" id="recSecsInput" inputmode="numeric" value="45" maxlength="3">
+      </div>
+    </div>
+    <div class="row">
+      <button class="primary" id="createBtn">Créer un salon</button>
+      <button class="ghost" id="joinToggle">Rejoindre</button>
+    </div>
+    <div class="divider"></div>
+    <label>Sur un seul appareil</label>
+    <p class="hint" style="margin-top:-4px;">Même pièce, même canapé ? Faites tourner le téléphone, chacun joue son tour.</p>
+    <div class="row" style="margin-top:10px;align-items:flex-end;">
+      <div>
+        <label for="localPlayersInput">Joueurs</label>
+        <input type="text" id="localPlayersInput" inputmode="numeric" value="3" maxlength="1" style="margin-bottom:0;">
+      </div>
+      <button class="ghost" id="localBtn">Lancer en local</button>
+    </div>
+    <div id="joinBox" style="display:none;margin-top:16px;">
+      <label for="codeInput">Code du salon</label>
+      <input type="text" id="codeInput" placeholder="Ex. FOXA" maxlength="4" style="text-transform:uppercase;">
+      <button class="primary" id="joinBtn">Rejoindre le salon</button>
+    </div>
+    <div id="landingError" class="error"></div>
+  </div>
+  <p class="small" style="margin-top:18px;">Ton navigateur te demandera le micro au premier enregistrement — une fois, pas plus.</p>
+  `;
+}
+function joinScreen(err){ const h = landingScreen(); return h.replace('<div class="error" id="landingError"></div>', ''); }
+
+function roomScreen(state){
+  const isHost = state.order[0] === myId;
+  const me = state.players.find(p=>p.id===myId);
+  const meIndex = state.order.indexOf(myId);
+
+  if(state.phase === 'lobby'){
+    return `
+    <div class="eyebrow">Salon</div>
+    <div class="roomcode">${state.code}</div>
+    <p class="subtitle">Partage ce code à tes potes. Dès que tout le monde est là, ${isHost ? 'lance la partie.' : "attends que l'hôte lance la partie."}</p>
+    ${isHost ? `<p class="hint">🖥️ Détail qui compte : c'est ton onglet qui fait tourner la partie. Tu le fermes, tout s'arrête.</p>` : ''}
+    <div class="card">
+      <label>Joueurs (${state.players.length})</label>
+      <ul class="players">
+        ${state.players.map(p=>`<li><span class="dot ${p.id===myId?'you':''}"></span>${p.name}${p.id===myId?' (toi)':''}${state.order[0]===p.id?' — hôte':''}</li>`).join('')}
+      </ul>
+      ${isHost ? `<button class="primary" style="margin-top:16px;" id="startBtn" ${state.players.length<2?'disabled':''}>Lancer la partie</button>
+      ${state.players.length<2?'<div class="hint">Il faut au moins 2 joueurs.</div>':''}` : `<div class="hint" style="margin-top:14px;">En attente que l'hôte lance la partie…</div>`}
+    </div>
+    `;
+  }
+
+  if(state.phase === 'playing'){
+    const turnIdx = state.turnIndex;
+    const activePlayerId = state.order[turnIdx % state.order.length];
+    const isMyTurn = state.solo ? true : (activePlayerId === myId);
+    const activePlayer = state.players.find(p=>p.id===activePlayerId);
+    const isSeed = turnIdx === 0;
+    const prevTurn = isSeed ? null : state.turns[turnIdx-1];
+
+    const canReveal = state.turns.length >= state.order.length;
+
+    return `
+    <div class="eyebrow">Salon ${state.code} · tour ${turnIdx+1} / ${state.maxTurns || '∞'}</div>
+    <h2 style="font-size:22px;">${state.solo ? `📱 À ${activePlayer.name} de jouer` : (isMyTurn ? "C'est ton tour" : `Au tour de ${activePlayer.name}`)}</h2>
+    <span class="badge yourturn" style="margin-top:8px;display:inline-block;">${state.solo ? 'partie locale' : (isMyTurn?'à toi de jouer':'en attente')}</span>
+    <span class="badge" id="turnTimerChip" style="margin-top:8px;margin-left:8px;display:none;">⏱ –</span>
+    ${state.solo ? `<p class="hint" style="margin-top:8px;">File l'appareil à ${activePlayer.name}. Les autres : on ne regarde pas !</p>` : ''}
+
+    ${isMyTurn ? myTurnUI(isSeed, prevTurn) : `<div class="card"><p class="hint">${activePlayer.name} est en train d'écouter, imiter, deviner… Ton tour approche.</p></div>`}
+
+    <div class="ticket-strip">
+      ${state.turns.map((t,i)=>`<div class="ticket">✳<span class="who">tour ${i+1}</span></div>`).join('')}
+    </div>
+
+    <p class="hint" style="margin-top:20px;">Révélation automatique après ${state.maxTurns} mots — on en est à ${state.turns.length}.</p>
+    ${canReveal ? `<div class="divider"></div><button class="ghost" id="revealBtn" style="width:100%;">On s'arrête là, révélation !</button>` : ''}
+    `;
+  }
+
+  if(state.phase === 'closing'){
+    const turnIdx = state.turnIndex;
+    const activePlayerId = state.order[turnIdx % state.order.length];
+    const isMyTurn = state.solo ? true : (activePlayerId === myId);
+    const activePlayer = state.players.find(p=>p.id===activePlayerId);
+    const prevTurn = state.turns[state.turns.length-1];
+    return `
+    <div class="eyebrow">Salon ${state.code} · dernier passage</div>
+    <h2 style="font-size:22px;">${state.solo ? `📱 À ${activePlayer.name} de clore la phrase` : (isMyTurn ? "À toi de clore la phrase" : `${activePlayer.name} clôt la phrase`)}</h2>
+    <span class="badge yourturn" style="margin-top:8px;display:inline-block;">clôture</span>
+    <span class="badge" id="turnTimerChip" style="margin-top:8px;margin-left:8px;display:none;">⏱ –</span>
+    <p class="hint" style="margin-top:8px;">Tous les mots sont posés. Reste à décoder le dernier, et on découvre le résultat.</p>
+    ${isMyTurn ? closingUI(prevTurn) : `<div class="card"><p class="hint">${activePlayer.name} décode le dernier mot… La révélation arrive juste après.</p></div>`}
+    `;
+  }
+
+  if(state.phase === 'reveal'){
+    return revealScreen(state);
+  }
+}
+
+function closingUI(prevTurn){
+  return `
+  <div class="card">
+    <div class="step" id="step1">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Écoute le dernier mot (à l'envers)</div>
+        ${playerHTML(prevTurn.reversedAudio)}
+      </div>
+    </div>
+    <div class="step" id="step2">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Essaie de le reproduire à voix haute</div>
+        <button id="attemptRecBtn">● Enregistrer ma tentative</button>
+        <div id="attemptRecStatus" class="hint"></div>
+      </div>
+    </div>
+    <div class="step locked" id="step3">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Écoute ta tentative remise à l'endroit</div>
+        <div id="attemptRevealAudio" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="step locked" id="step4">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Dis proprement ce que tu as compris</div>
+        <div class="step-desc">La toute dernière brique de la phrase du groupe.</div>
+        <button id="perceptionRecBtn">● Enregistrer ce que j'ai compris</button>
+        <div id="perceptionRecStatus" class="hint"></div>
+      </div>
+    </div>
+    <button class="primary" id="closingSubmitBtn" style="margin-top:14px;" disabled>Révéler la phrase</button>
+  </div>`;
+}
+
+function myTurnUI(isSeed, prevTurn){
+  if(isSeed){
+    return `
+    <div class="card">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Invente le premier mot</div>
+          <div class="step-desc">Balance un mot, bien articulé. Il partira à l'envers chez le joueur suivant — il ne l'entendra jamais à l'endroit.</div>
+          <button id="seedRecBtn">● Enregistrer</button>
+          <div id="seedRecStatus" class="hint"></div>
+          <div id="seedPreview" style="display:none;"></div>
+        </div>
+      </div>
+      <button class="primary" id="seedSubmitBtn" style="margin-top:14px;" disabled>Envoyer au joueur suivant</button>
+    </div>`;
+  }
+  return `
+  <div class="card">
+    <div class="step" id="step1">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Écoute ce qu'on t'a envoyé</div>
+        <div class="step-desc">C'est le mot du joueur d'avant, joué à l'envers. Aucune idée de ce que c'est ? Normal.</div>
+        ${playerHTML(prevTurn.reversedAudio)}
+      </div>
+    </div>
+    <div class="step" id="step2">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Imite-le à voix haute</div>
+        <div class="step-desc">Reproduis ce charabia du mieux que tu peux, sans chercher à comprendre.</div>
+        <button id="attemptRecBtn">● Enregistrer ma tentative</button>
+        <div id="attemptRecStatus" class="hint"></div>
+      </div>
+    </div>
+    <div class="step locked" id="step3">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Écoute ta tentative remise à l'endroit</div>
+        <div class="step-desc">Ton seul vrai indice sur ce qui a été dit au départ. Tends l'oreille.</div>
+        <div id="attemptRevealAudio" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="step locked" id="step4">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Dis ce que tu as compris</div>
+        <div class="step-desc">Prononce clairement le mot que tu crois avoir entendu — c'est lui qui finira dans la phrase du groupe.</div>
+        <button id="perceptionRecBtn">● Enregistrer ce que j'ai compris</button>
+        <div id="perceptionRecStatus" class="hint"></div>
+      </div>
+    </div>
+    <div class="step locked" id="step5">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Ajoute ton mot à la chaîne</div>
+        <div class="step-desc">À toi de jouer : ton mot partira à l'envers chez le joueur suivant.</div>
+        <button id="newWordRecBtn">● Enregistrer mon mot</button>
+        <div id="newWordRecStatus" class="hint"></div>
+      </div>
+    </div>
+    <button class="primary" id="turnSubmitBtn" style="margin-top:14px;" disabled>Envoyer au joueur suivant</button>
+  </div>`;
+}
+
+function revealScreen(state){
+  return `
+  <div class="eyebrow">Révélation</div>
+  <h2 style="font-size:26px;">Le grand écart</h2>
+  <div class="card">
+    <div class="step">
+      <div class="step-num">A</div>
+      <div class="step-body">
+        <div class="step-title">La vraie phrase</div>
+        <div class="step-desc">Tous les mots vraiment prononcés, mis bout à bout. Personne ne l'a encore jamais entendue en entier.</div>
+        <button class="primary" id="playRealBtn">▶ Écouter la vraie phrase</button>
+        <div id="realStatus" class="hint"></div>
+        <div id="realAudio" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">B</div>
+      <div class="step-body">
+        <div class="step-title">La phrase perçue</div>
+        <div class="step-desc">Ce que chacun a cru comprendre, mis bout à bout. Le fameux résultat du téléphone arabe.</div>
+        <button class="primary" id="playPerceivedBtn">▶ Écouter la phrase perçue</button>
+        <div id="perceivedStatus" class="hint"></div>
+        <div id="perceivedAudio" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="card">
+    <div class="chain-label">Le détail, tour par tour</div>
+    ${state.turns.map((t,i)=>`
+      <div style="margin-bottom:14px;">
+        <div class="hint">Tour ${i+1} — mot de ${escapeHtml(t.playerName)}</div>
+        ${playerHTML(t.audio)}
+        ${t.perceptionAudio ? `<div class="hint" style="margin-top:6px;">Ce que ${escapeHtml(t.playerName)} a compris du mot précédent</div>
+        ${playerHTML(t.perceptionAudio)}` : ''}
+        ${t.attemptRestoredAudio ? `<div class="hint" style="margin-top:6px;">Son imitation brute, remise à l'endroit</div>
+        ${playerHTML(t.attemptRestoredAudio)}` : ''}
+      </div>
+    `).join('')}
+    ${state.finalPerception ? `
+      <div style="margin-bottom:14px;">
+        <div class="hint">Clôture — ce que ${escapeHtml(state.finalPerception.playerName)} a compris du dernier mot</div>
+        ${playerHTML(state.finalPerception.perceptionAudio)}
+        <div class="hint" style="margin-top:6px;">Son imitation brute, remise à l'endroit</div>
+        ${playerHTML(state.finalPerception.attemptRestoredAudio)}
+      </div>` : ''}
+  </div>
+  <button class="ghost" id="newGameBtn" style="margin-top:18px;width:100%;">Retour à l'accueil</button>
+  `;
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ====================== EVENTS ====================== */
+let seedBlob=null, attemptBlob=null, newWordBlob=null, attemptReversedB64=null, perceptionBlob=null;
+const streamHandle = {stopFn:null};
+const REC_BTN_IDS = ['seedRecBtn','attemptRecBtn','perceptionRecBtn','newWordRecBtn'];
+// While one recording is live, every OTHER record button is disabled: two
+// MediaRecorders on the same mic stream corrupt each other's state.
+function setRecLock(activeId){
+  REC_BTN_IDS.forEach(id=>{
+    const b = document.getElementById(id);
+    if(b) b.disabled = activeId ? (id !== activeId) : false;
+  });
+}
+
+function wireEvents(){
+  const createBtn = document.getElementById('createBtn');
+  if(createBtn){
+    createBtn.onclick = async ()=>{
+      myName = document.getElementById('nameInput').value.trim();
+      if(!myName){ showLandingError("Entre ton prénom d'abord."); return; }
+      createBtn.disabled=true; createBtn.textContent='Création…';
+      await createRoom();
+    };
+  }
+  const localBtn = document.getElementById('localBtn');
+  if(localBtn) localBtn.onclick = async ()=>{
+    myName = document.getElementById('nameInput').value.trim() || 'Joueur 1';
+    let n = parseInt(document.getElementById('localPlayersInput').value, 10);
+    if(isNaN(n)) n = 3;
+    n = Math.max(2, Math.min(8, n));
+    localBtn.disabled=true;
+    await createLocalRoom(n);
+  };
+  const joinToggle = document.getElementById('joinToggle');
+  if(joinToggle) joinToggle.onclick = ()=>{
+    document.getElementById('joinBox').style.display='block';
+  };
+  const joinBtn = document.getElementById('joinBtn');
+  if(joinBtn){
+    joinBtn.onclick = async ()=>{
+      myName = document.getElementById('nameInput').value.trim();
+      const code = document.getElementById('codeInput').value.trim();
+      if(!myName){ showLandingError("Entre ton prénom d'abord."); return; }
+      if(!code){ showLandingError('Entre un code de salon.'); return; }
+      joinBtn.disabled=true; joinBtn.textContent='Connexion…';
+      await joinRoom(code);
+    };
+  }
+
+  const startBtn = document.getElementById('startBtn');
+  if(startBtn) startBtn.onclick = async ()=>{
+    const state = await readRoom(currentRoom);
+    state.phase='playing';
+    await writeRoom(currentRoom, state);
+    lastRenderedJson = null;
+    poll();
+  };
+
+  const revealBtn = document.getElementById('revealBtn');
+  if(revealBtn) revealBtn.onclick = async ()=>{
+    const state = await readRoom(currentRoom);
+    state.phase='closing';
+    await writeRoom(currentRoom, state);
+    lastRenderedJson = null;
+    poll();
+  };
+
+  async function stitchAndPlay(btnId, statusId, audioId, urls, emptyMsg){
+    const btn = document.getElementById(btnId);
+    const status = document.getElementById(statusId);
+    const audioEl = document.getElementById(audioId);
+    if(!urls.length){ status.textContent = emptyMsg; return; }
+    btn.disabled = true; status.textContent = 'Assemblage…';
+    try{
+      const stitched = await concatDataUrls(urls);
+      audioEl.innerHTML = playerHTML(stitched);
+      audioEl.style.display='block';
+      status.textContent = '';
+      const pb = audioEl.querySelector('.pbtn'); if(pb) pb.click();
+    }catch(e){ status.textContent = 'Erreur : ' + (e.message||e); }
+    btn.disabled = false;
+  }
+  const playRealBtn = document.getElementById('playRealBtn');
+  if(playRealBtn) playRealBtn.onclick = ()=>{
+    stitchAndPlay('playRealBtn','realStatus','realAudio',
+      localState.turns.map(t=>t.audio), 'Aucun enregistrement.');
+  };
+  const playPerceivedBtn = document.getElementById('playPerceivedBtn');
+  if(playPerceivedBtn) playPerceivedBtn.onclick = ()=>{
+    stitchAndPlay('playPerceivedBtn','perceivedStatus','perceivedAudio',
+      localState.turns.filter(t=>t.perceptionAudio).map(t=>t.perceptionAudio)
+        .concat(localState.finalPerception ? [localState.finalPerception.perceptionAudio] : []),
+      'Rien à écouter ici — il faut au moins 2 tours.');
+  };
+
+  const newGameBtn = document.getElementById('newGameBtn');
+  if(newGameBtn) newGameBtn.onclick = ()=>{
+    currentRoom=null; if(pollTimer) clearInterval(pollTimer);
+    teardownNet();
+    clearTurnTimer();
+    lastRenderedJson = null;
+    render(landingScreen()); wireEvents();
+  };
+
+  // Seed turn
+  const seedRecBtn = document.getElementById('seedRecBtn');
+  if(seedRecBtn) seedRecBtn.onclick = async ()=>{
+    if(seedRecBtn.classList.contains('rec-active')){
+      streamHandle.stopFn && streamHandle.stopFn();
+      return;
+    }
+    if(isRecording) return; // another recording is live — ignore
+    seedRecBtn.classList.add('rec-active'); seedRecBtn.textContent='■ Arrêter';
+    document.getElementById('seedRecStatus').textContent = 'Enregistrement…';
+    isRecording = true;
+    setRecLock('seedRecBtn');
+    try{
+      seedBlob = await recordWithTimer(streamHandle, 'seedRecStatus');
+      seedRecBtn.classList.remove('rec-active'); seedRecBtn.textContent='● Ré-enregistrer';
+      document.getElementById('seedRecStatus').textContent = 'Enregistré ✓';
+      const prev = document.getElementById('seedPreview');
+      prev.innerHTML = playerHTML(URL.createObjectURL(seedBlob)); prev.style.display='block';
+      isRecording = false;
+      setRecLock(null);
+      checkSeedReady();
+    }catch(e){
+      isRecording = false;
+      setRecLock(null);
+      document.getElementById('seedRecStatus').textContent = 'Erreur micro : ' + (e.message||e);
+      seedRecBtn.classList.remove('rec-active'); seedRecBtn.textContent='● Enregistrer';
+    }
+  };
+  function checkSeedReady(){
+    const btn = document.getElementById('seedSubmitBtn');
+    btn.disabled = !seedBlob;
+  }
+  const seedSubmitBtn = document.getElementById('seedSubmitBtn');
+  if(seedSubmitBtn) seedSubmitBtn.onclick = ()=>doSubmitSeed();
+
+  // Regular turn
+  const attemptRecBtn = document.getElementById('attemptRecBtn');
+  if(attemptRecBtn) attemptRecBtn.onclick = async ()=>{
+    if(attemptRecBtn.classList.contains('rec-active')){
+      streamHandle.stopFn && streamHandle.stopFn();
+      return;
+    }
+    if(isRecording) return; // another recording is live — ignore
+    attemptRecBtn.classList.add('rec-active'); attemptRecBtn.textContent='■ Arrêter';
+    document.getElementById('attemptRecStatus').textContent = 'Enregistrement de ta tentative…';
+    isRecording = true;
+    setRecLock('attemptRecBtn');
+    try{
+      attemptBlob = await recordWithTimer(streamHandle, 'attemptRecStatus');
+      attemptRecBtn.classList.remove('rec-active'); attemptRecBtn.textContent='● Ré-enregistrer';
+      document.getElementById('attemptRecStatus').textContent = 'Une seconde, je le retourne…';
+      attemptReversedB64 = await reverseBlobToWavB64(attemptBlob);
+      document.getElementById('attemptRecStatus').textContent = 'Tentative enregistrée ✓';
+      document.getElementById('step3').classList.remove('locked');
+      const revealAudio = document.getElementById('attemptRevealAudio');
+      revealAudio.innerHTML = playerHTML(attemptReversedB64); revealAudio.style.display='block';
+      document.getElementById('step4').classList.remove('locked');
+      const s5 = document.getElementById('step5');
+      if(s5) s5.classList.remove('locked');
+      isRecording = false;
+      setRecLock(null);
+      checkTurnReady();
+      checkClosingReady();
+    }catch(e){
+      isRecording = false;
+      setRecLock(null);
+      document.getElementById('attemptRecStatus').textContent = 'Erreur micro : ' + (e.message||e);
+      attemptRecBtn.classList.remove('rec-active'); attemptRecBtn.textContent='● Enregistrer ma tentative';
+    }
+  };
+
+
+  const perceptionRecBtn = document.getElementById('perceptionRecBtn');
+  if(perceptionRecBtn) perceptionRecBtn.onclick = async ()=>{
+    if(perceptionRecBtn.classList.contains('rec-active')){
+      streamHandle.stopFn && streamHandle.stopFn();
+      return;
+    }
+    if(isRecording) return; // another recording is live — ignore
+    perceptionRecBtn.classList.add('rec-active'); perceptionRecBtn.textContent='■ Arrêter';
+    document.getElementById('perceptionRecStatus').textContent = 'Enregistrement…';
+    isRecording = true;
+    setRecLock('perceptionRecBtn');
+    try{
+      perceptionBlob = await recordWithTimer(streamHandle, 'perceptionRecStatus');
+      perceptionRecBtn.classList.remove('rec-active'); perceptionRecBtn.textContent='● Ré-enregistrer';
+      document.getElementById('perceptionRecStatus').textContent = 'Enregistré ✓';
+      isRecording = false;
+      setRecLock(null);
+      checkTurnReady();
+      checkClosingReady();
+    }catch(e){
+      isRecording = false;
+      setRecLock(null);
+      document.getElementById('perceptionRecStatus').textContent = 'Erreur micro : ' + (e.message||e);
+      perceptionRecBtn.classList.remove('rec-active'); perceptionRecBtn.textContent='● Enregistrer ce que j\'ai compris';
+    }
+  };
+
+  const newWordRecBtn = document.getElementById('newWordRecBtn');
+  if(newWordRecBtn) newWordRecBtn.onclick = async ()=>{
+    if(newWordRecBtn.classList.contains('rec-active')){
+      streamHandle.stopFn && streamHandle.stopFn();
+      return;
+    }
+    if(isRecording) return; // another recording is live — ignore
+    newWordRecBtn.classList.add('rec-active'); newWordRecBtn.textContent='■ Arrêter';
+    document.getElementById('newWordRecStatus').textContent = 'Enregistrement…';
+    isRecording = true;
+    setRecLock('newWordRecBtn');
+    try{
+      newWordBlob = await recordWithTimer(streamHandle, 'newWordRecStatus');
+      newWordRecBtn.classList.remove('rec-active'); newWordRecBtn.textContent='● Ré-enregistrer';
+      document.getElementById('newWordRecStatus').textContent = 'Enregistré ✓';
+      isRecording = false;
+      setRecLock(null);
+      checkTurnReady();
+    }catch(e){
+      isRecording = false;
+      setRecLock(null);
+      document.getElementById('newWordRecStatus').textContent = 'Erreur micro : ' + (e.message||e);
+      newWordRecBtn.classList.remove('rec-active'); newWordRecBtn.textContent='● Enregistrer mon mot';
+    }
+  };
+
+  function checkTurnReady(){
+    const btn = document.getElementById('turnSubmitBtn');
+    if(!btn) return;
+    btn.disabled = !(newWordBlob && attemptReversedB64 && perceptionBlob);
+  }
+
+  function checkClosingReady(){
+    const btn = document.getElementById('closingSubmitBtn');
+    if(!btn) return;
+    btn.disabled = !(attemptReversedB64 && perceptionBlob);
+  }
+
+  const closingSubmitBtn = document.getElementById('closingSubmitBtn');
+  if(closingSubmitBtn) closingSubmitBtn.onclick = ()=>doSubmitClosing();
+
+  const turnSubmitBtn = document.getElementById('turnSubmitBtn');
+  if(turnSubmitBtn) turnSubmitBtn.onclick = ()=>doSubmitTurn();
+
+}
+
+function myNameOf(state){
+  const p = state.players.find(p=>p.id===myId);
+  return p ? p.name : myName;
+}
+
+/* ====================== INIT ====================== */
+render(landingScreen());
+</script>
+</body>
+</html>
