@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reverse Phone — le téléphone arabe à l'envers</title>
+<title>Reverse Phone — le jeu du téléphone à l'envers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -851,17 +851,17 @@ function micAvailable(){
 function landingScreen(){
   const micWarning = micAvailable() ? '' : `
   <div class="card" style="border-color:var(--rec);">
-    <div class="step-title">🎤 Micro inaccessible ici</div>
+    <div class="step-title">Micro inaccessible ici</div>
     <p class="hint">Ton navigateur bloque le micro parce que la page n'est pas ouverte via une adresse sécurisée (https). C'est le cas quand on ouvre le fichier téléchargé directement, surtout sur téléphone.</p>
     <p class="hint">Ouvre plutôt le jeu depuis son lien https (celui qu'on t'a partagé) — depuis un fichier téléchargé, le micro reste bloqué, surtout sur téléphone.</p>
   </div>`;
   return micWarning + `
-  <div class="eyebrow">Le téléphone arabe… à l'envers</div>
+  <div class="eyebrow">Le jeu du téléphone… à l'envers</div>
   <div class="title-flip" id="titleFlip">Reverse <span class="mirror">Phone</span></div>
   <p class="subtitle">Un mot circule de joueur en joueur, toujours à l'envers. Tu l'écoutes, tu l'imites, tu découvres ce que ça donne remis à l'endroit… puis tu ajoutes le tien. À la fin, on compare ce qui a vraiment été dit avec ce que tout le monde a cru entendre. Spoiler : c'est jamais pareil.</p>
   <div class="card">
     <label for="nameInput">Ton prénom</label>
-    <input type="text" id="nameInput" placeholder="Ex. Anthal" maxlength="20">
+    <input type="text" id="nameInput" placeholder="UnSuperSurnom" maxlength="20">
     <div class="row">
       <div>
         <label for="roundsInput">Nombre de mots</label>
@@ -878,7 +878,7 @@ function landingScreen(){
     </div>
     <div class="divider"></div>
     <label>Sur un seul appareil</label>
-    <p class="hint" style="margin-top:-4px;">Même pièce, même canapé ? Faites tourner le téléphone, chacun joue son tour.</p>
+    <p class="hint" style="margin-top:-4px;">Même pièce, même canapé ? Faites tourner le téléphone, chacun s'isole puis joue son tour.</p>
     <div class="row" style="margin-top:10px;align-items:flex-end;">
       <div>
         <label for="localPlayersInput">Joueurs</label>
@@ -893,7 +893,6 @@ function landingScreen(){
     </div>
     <div id="landingError" class="error"></div>
   </div>
-  <p class="small" style="margin-top:18px;">Ton navigateur te demandera le micro au premier enregistrement — une fois, pas plus.</p>
   `;
 }
 function joinScreen(err){ const h = landingScreen(); return h.replace('<div class="error" id="landingError"></div>', ''); }
@@ -907,8 +906,8 @@ function roomScreen(state){
     return `
     <div class="eyebrow">Salon</div>
     <div class="roomcode">${state.code}</div>
-    <p class="subtitle">Partage ce code à tes potes. Dès que tout le monde est là, ${isHost ? 'lance la partie.' : "attends que l'hôte lance la partie."}</p>
-    ${isHost ? `<p class="hint">🖥️ Détail qui compte : c'est ton onglet qui fait tourner la partie. Tu le fermes, tout s'arrête.</p>` : ''}
+    <p class="subtitle">Partage ce code à tes copains. Dès que tout le monde est là, ${isHost ? 'lance la partie.' : "attends que l'hôte lance la partie."}</p>
+    ${isHost ? `<p class="hint">Détail qui compte : c'est ton onglet qui fait tourner la partie. Tu le fermes, tout s'arrête.</p>` : ''}
     <div class="card">
       <label>Joueurs (${state.players.length})</label>
       <ul class="players">
@@ -956,7 +955,7 @@ function roomScreen(state){
     const prevTurn = state.turns[state.turns.length-1];
     return `
     <div class="eyebrow">Salon ${state.code} · dernier passage</div>
-    <h2 style="font-size:22px;">${state.solo ? `📱 À ${activePlayer.name} de clore la phrase` : (isMyTurn ? "À toi de clore la phrase" : `${activePlayer.name} clôt la phrase`)}</h2>
+    <h2 style="font-size:22px;">${state.solo ? `À ${activePlayer.name} de clore la phrase` : (isMyTurn ? "À toi de clore la phrase" : `${activePlayer.name} clôt la phrase`)}</h2>
     <span class="badge yourturn" style="margin-top:8px;display:inline-block;">clôture</span>
     <span class="badge" id="turnTimerChip" style="margin-top:8px;margin-left:8px;display:none;">⏱ –</span>
     <p class="hint" style="margin-top:8px;">Tous les mots sont posés. Reste à décoder le dernier, et on découvre le résultat.</p>
@@ -1014,8 +1013,8 @@ function myTurnUI(isSeed, prevTurn){
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-title">Invente le premier mot</div>
-          <div class="step-desc">Balance un mot, bien articulé. Il partira à l'envers chez le joueur suivant — il ne l'entendra jamais à l'endroit.</div>
+          <div class="step-title">Donne le premier mot</div>
+          <div class="step-desc">Balance une expression, un mot doux, une insulte... on s'en fiche tant que c'est bien articulé. Il partira à l'envers chez le joueur suivant — il ne l'entendra jamais à l'endroit.</div>
           <button id="seedRecBtn">● Enregistrer</button>
           <div id="seedRecStatus" class="hint"></div>
           <div id="seedPreview" style="display:none;"></div>
@@ -1038,7 +1037,7 @@ function myTurnUI(isSeed, prevTurn){
       <div class="step-num">2</div>
       <div class="step-body">
         <div class="step-title">Imite-le à voix haute</div>
-        <div class="step-desc">Reproduis ce charabia du mieux que tu peux, sans chercher à comprendre.</div>
+        <div class="step-desc">Reproduis ce charabia du mieux que tu peux.</div>
         <button id="attemptRecBtn">● Enregistrer ma tentative</button>
         <div id="attemptRecStatus" class="hint"></div>
       </div>
@@ -1055,7 +1054,7 @@ function myTurnUI(isSeed, prevTurn){
       <div class="step-num">4</div>
       <div class="step-body">
         <div class="step-title">Dis ce que tu as compris</div>
-        <div class="step-desc">Prononce clairement le mot que tu crois avoir entendu — c'est lui qui finira dans la phrase du groupe.</div>
+        <div class="step-desc">Prononce clairement ce que tu crois avoir entendu, c'est ce qui finira dans la phrase du groupe.</div>
         <button id="perceptionRecBtn">● Enregistrer ce que j'ai compris</button>
         <div id="perceptionRecStatus" class="hint"></div>
       </div>
@@ -1063,8 +1062,8 @@ function myTurnUI(isSeed, prevTurn){
     <div class="step locked" id="step5">
       <div class="step-num">5</div>
       <div class="step-body">
-        <div class="step-title">Ajoute ton mot à la chaîne</div>
-        <div class="step-desc">À toi de jouer : ton mot partira à l'envers chez le joueur suivant.</div>
+        <div class="step-title">Ajoute ton contribution à la chaîne</div>
+        <div class="step-desc">À toi de jouer : tes douces paroles partiront à l'envers chez le joueur suivant.</div>
         <button id="newWordRecBtn">● Enregistrer mon mot</button>
         <div id="newWordRecStatus" class="hint"></div>
       </div>
@@ -1092,7 +1091,7 @@ function revealScreen(state){
       <div class="step-num">B</div>
       <div class="step-body">
         <div class="step-title">La phrase perçue</div>
-        <div class="step-desc">Ce que chacun a cru comprendre, mis bout à bout. Le fameux résultat du téléphone arabe.</div>
+        <div class="step-desc">Ce que chacun a cru comprendre, mis bout à bout.</div>
         <button class="primary" id="playPerceivedBtn">▶ Écouter la phrase perçue</button>
         <div id="perceivedStatus" class="hint"></div>
         <div id="perceivedAudio" style="display:none;"></div>
