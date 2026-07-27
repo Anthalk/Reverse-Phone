@@ -692,6 +692,10 @@ async function poll(){
 /* ====================== TURN TIMER ====================== */
 let turnTimer = {key:null, iv:null, deadline:0};
 let submitting = false;
+// The turn's chrome only starts after the player taps "Je suis prêt !" —
+// readyForKey remembers which turn was armed.
+let readyForKey = null;
+function turnKeyOf(state){ return state.code + ':' + state.phase + ':' + state.turnIndex; }
 
 function clearTurnTimer(){
   if(turnTimer.iv) clearInterval(turnTimer.iv);
@@ -708,7 +712,8 @@ function manageTurnTimer(state){
   const activeId = state.order[idx % state.order.length];
   const mine = state.solo ? true : (activeId === myId);
   if(!mine){ clearTurnTimer(); return; }
-  const key = state.code + ':' + state.phase + ':' + idx;
+  const key = turnKeyOf(state);
+  if(readyForKey !== key){ clearTurnTimer(); return; } // waiting for the Ready tap
   if(turnTimer.key === key) return; // already running for this turn
   clearTurnTimer();
   turnTimer.key = key;
@@ -907,13 +912,18 @@ function roomScreen(state){
     <div class="eyebrow">Salon</div>
     <div class="roomcode">${state.code}</div>
     <p class="subtitle">Partage ce code à tes copains. Dès que tout le monde est là, ${isHost ? 'lance la partie.' : "attends que l'hôte lance la partie."}</p>
+    ${(!state.solo && location.protocol.startsWith('http')) ? `<div style="margin-top:12px;"><button class="ghost" id="copyInviteBtn">Copier le lien d'invitation</button><span class="small" id="copyStatus" style="margin-left:10px;"></span></div>` : ''}
     ${isHost ? `<p class="hint">Détail qui compte : c'est ton onglet qui fait tourner la partie. Tu le fermes, tout s'arrête.</p>` : ''}
     <div class="card">
       <label>Joueurs (${state.players.length})</label>
       <ul class="players">
         ${state.players.map(p=>`<li><span class="dot ${p.id===myId?'you':''}"></span>${p.name}${p.id===myId?' (toi)':''}${state.order[0]===p.id?' — hôte':''}</li>`).join('')}
       </ul>
-      ${isHost ? `<button class="primary" style="margin-top:16px;" id="startBtn" ${state.players.length<2?'disabled':''}>Lancer la partie</button>
+      ${isHost ? `<div class="row" style="margin-top:16px;">
+        <div><label for="roundsInput">Nombre de mots</label><input type="text" id="roundsInput" inputmode="numeric" value="${state.maxTurns || 6}" maxlength="2"></div>
+        <div><label for="recSecsInput">Temps par tour (s)</label><input type="text" id="recSecsInput" inputmode="numeric" value="${state.recSeconds || 45}" maxlength="3"></div>
+      </div>
+      <button class="primary" id="startBtn" ${state.players.length<2?'disabled':''}>Lancer la partie</button>
       ${state.players.length<2?'<div class="hint">Il faut au moins 2 joueurs.</div>':''}` : `<div class="hint" style="margin-top:14px;">En attente que l'hôte lance la partie…</div>`}
     </div>
     `;
@@ -936,7 +946,7 @@ function roomScreen(state){
     <span class="badge" id="turnTimerChip" style="margin-top:8px;margin-left:8px;display:none;">⏱ –</span>
     ${state.solo ? `<p class="hint" style="margin-top:8px;">File l'appareil à ${activePlayer.name}. Les autres : on ne regarde pas !</p>` : ''}
 
-    ${isMyTurn ? myTurnUI(isSeed, prevTurn) : `<div class="card"><p class="hint">${activePlayer.name} est en train d'écouter, imiter, deviner… Ton tour approche.</p></div>`}
+    ${isMyTurn ? (readyForKey === turnKeyOf(state) ? myTurnUI(isSeed, prevTurn) : readyUI(state, isSeed, false)) : `<div class="card"><p class="hint">${activePlayer.name} est en train d'écouter, imiter, deviner… Ton tour approche.</p></div>`}
 
     <div class="ticket-strip">
       ${state.turns.map((t,i)=>`<div class="ticket">✳<span class="who">tour ${i+1}</span></div>`).join('')}
@@ -959,13 +969,28 @@ function roomScreen(state){
     <span class="badge yourturn" style="margin-top:8px;display:inline-block;">clôture</span>
     <span class="badge" id="turnTimerChip" style="margin-top:8px;margin-left:8px;display:none;">⏱ –</span>
     <p class="hint" style="margin-top:8px;">Tous les mots sont posés. Reste à décoder le dernier, et on découvre le résultat.</p>
-    ${isMyTurn ? closingUI(prevTurn) : `<div class="card"><p class="hint">${activePlayer.name} décode le dernier mot… La révélation arrive juste après.</p></div>`}
+    ${isMyTurn ? (readyForKey === turnKeyOf(state) ? closingUI(prevTurn) : readyUI(state, false, true)) : `<div class="card"><p class="hint">${activePlayer.name} décode le dernier mot… La révélation arrive juste après.</p></div>`}
     `;
   }
 
   if(state.phase === 'reveal'){
     return revealScreen(state);
   }
+}
+
+function readyUI(state, isSeed, isClosing){
+  const steps = isSeed
+    ? "tu enregistres le tout premier mot (bien articulé !) et tu l'envoies"
+    : (isClosing
+      ? "tu écoutes le dernier mot à l'envers, tu l'imites, tu écoutes ta version remise à l'endroit, et tu dis ce que tu as compris"
+      : "tu écoutes le son reçu, tu l'imites, tu écoutes ta version remise à l'endroit, tu dis ce que tu as compris, puis tu ajoutes ton mot");
+  return `
+  <div class="card">
+    <div class="step-title">Quand tu veux !</div>
+    <p class="hint" style="margin-top:8px;">Au programme : ${steps}.</p>
+    <p class="hint">Tu auras ${state.recSeconds || 45} secondes après le compte à rebours. Là tout de suite, le chrono n'a pas commencé — souffle un coup.</p>
+    <button class="primary" id="readyBtn" style="margin-top:12px;">Je suis prêt !</button>
+  </div>`;
 }
 
 function closingUI(prevTurn){
@@ -1119,7 +1144,8 @@ function revealScreen(state){
         ${playerHTML(state.finalPerception.attemptRestoredAudio)}
       </div>` : ''}
   </div>
-  <button class="ghost" id="newGameBtn" style="margin-top:18px;width:100%;">Retour à l'accueil</button>
+  ${(state.solo || state.order[0] === myId) ? `<button class="primary" id="replayBtn" style="margin-top:18px;">Rejouer avec les mêmes joueurs</button>` : `<p class="hint center" style="margin-top:18px;">L'hôte peut relancer une partie dans ce même salon.</p>`}
+  <button class="ghost" id="newGameBtn" style="margin-top:10px;width:100%;">Retour à l'accueil</button>
   `;
 }
 
@@ -1175,9 +1201,32 @@ function wireEvents(){
     };
   }
 
+  const copyInviteBtn = document.getElementById('copyInviteBtn');
+  if(copyInviteBtn) copyInviteBtn.onclick = async ()=>{
+    const link = location.origin + location.pathname + '?room=' + currentRoom;
+    const status = document.getElementById('copyStatus');
+    try{
+      await navigator.clipboard.writeText(link);
+      if(status) status.textContent = 'Lien copié !';
+    }catch(e){
+      window.prompt('Copie ce lien :', link);
+    }
+    setTimeout(()=>{ const s=document.getElementById('copyStatus'); if(s) s.textContent=''; }, 2500);
+  };
+
+  const readyBtn = document.getElementById('readyBtn');
+  if(readyBtn) readyBtn.onclick = ()=>{
+    if(!localState) return;
+    readyForKey = turnKeyOf(localState);
+    lastRenderedJson = null;
+    poll();
+  };
+
   const startBtn = document.getElementById('startBtn');
   if(startBtn) startBtn.onclick = async ()=>{
     const state = await readRoom(currentRoom);
+    state.maxTurns = readRounds();
+    state.recSeconds = readRecSecs();
     state.phase='playing';
     await writeRoom(currentRoom, state);
     lastRenderedJson = null;
@@ -1221,11 +1270,27 @@ function wireEvents(){
       'Rien à écouter ici — il faut au moins 2 tours.');
   };
 
+  const replayBtn = document.getElementById('replayBtn');
+  if(replayBtn) replayBtn.onclick = async ()=>{
+    replayBtn.disabled = true;
+    const state = await readRoom(currentRoom);
+    state.turns = [];
+    state.turnIndex = 0;
+    delete state.finalPerception;
+    state.phase = 'lobby';
+    readyForKey = null;
+    clearTurnTimer();
+    await writeRoom(currentRoom, state);
+    lastRenderedJson = null;
+    poll();
+  };
+
   const newGameBtn = document.getElementById('newGameBtn');
   if(newGameBtn) newGameBtn.onclick = ()=>{
     currentRoom=null; if(pollTimer) clearInterval(pollTimer);
     teardownNet();
     clearTurnTimer();
+    readyForKey = null;
     lastRenderedJson = null;
     render(landingScreen()); wireEvents();
   };
@@ -1382,6 +1447,19 @@ function myNameOf(state){
 
 /* ====================== INIT ====================== */
 render(landingScreen());
+(function(){
+  const invited = new URLSearchParams(location.search).get('room');
+  if(invited && /^[A-Za-z]{4}$/.test(invited)){
+    const box = document.getElementById('joinBox');
+    const codeInput = document.getElementById('codeInput');
+    if(box && codeInput){
+      box.style.display = 'block';
+      codeInput.value = invited.toUpperCase();
+      box.insertAdjacentHTML('afterbegin',
+        `<p class="hint" style="margin-top:0;color:var(--sun);">Tu es invité au salon ${invited.toUpperCase()} — entre ton prénom au-dessus et clique Rejoindre.</p>`);
+    }
+  }
+})();
 </script>
 </body>
 </html>
