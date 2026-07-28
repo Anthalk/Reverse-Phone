@@ -495,8 +495,66 @@ function hostBroadcast(json){
   net.conns.forEach(c=>{ if(c.open) c.send({t:'state', state: json}); });
 }
 
+/* --------- Gartic-style parallel chains (online mode) --------- */
+// P players -> P chains. Round r: player i plays on chain (i - r) mod P.
+// Closing round (r = P): each player decodes the END of their OWN chain.
+function chainsRound(state){
+  const P = state.order.length;
+  const minLen = Math.min.apply(null, state.chains.map(c=>c.turns.length));
+  return Math.min(minLen, P);
+}
+function currentChainCtx(state){
+  const P = state.order.length;
+  const r = chainsRound(state);
+  const mi = state.order.indexOf(myId);
+  const closing = r >= P;
+  const c = closing ? mi : ((mi - r) % P + P) % P;
+  return {P, r, mi, closing, c};
+}
+// Parallel submissions can't overwrite the full state (they'd clobber each
+// other) — chain turns travel as targeted messages the host merges.
+function applyChainMsg(state, msg){
+  if(msg.t === 'chainTurn'){
+    const ch = state.chains && state.chains[msg.chainIdx];
+    if(ch && ch.turns.length === msg.pos) ch.turns.push(msg.turn);
+  } else if(msg.t === 'chainClose'){
+    const ch = state.chains && state.chains[msg.chainIdx];
+    if(ch && !ch.finalPerception) ch.finalPerception = msg.perception;
+    if(state.chains && state.chains.every(c=>c.finalPerception)) state.phase = 'reveal';
+  }
+}
+async function submitChainMsg(msg){
+  if(net.mode === 'guest'){
+    if(net.cache){
+      const state = JSON.parse(net.cache);
+      applyChainMsg(state, msg); // optimistic — host echo is authoritative
+      net.cache = JSON.stringify(state);
+    }
+    if(net.guestConn && net.guestConn.open) net.guestConn.send(msg);
+  } else {
+    const state = JSON.parse(memoryStore[roomKey(currentRoom)]);
+    applyChainMsg(state, msg);
+    const json = JSON.stringify(state);
+    memoryStore[roomKey(currentRoom)] = json;
+    hostBroadcast(json);
+  }
+  lastRenderedJson = null;
+  poll();
+}
+
 function handleHostData(conn, msg){
   if(!msg || !msg.t || !currentRoom) return;
+  if(msg.t === 'chainTurn' || msg.t === 'chainClose'){
+    const v = memoryStore[roomKey(currentRoom)];
+    if(!v) return;
+    const state = JSON.parse(v);
+    applyChainMsg(state, msg);
+    const json = JSON.stringify(state);
+    memoryStore[roomKey(currentRoom)] = json;
+    hostBroadcast(json);
+    poll();
+    return;
+  }
   if(msg.t === 'hello'){
     const v = memoryStore[roomKey(currentRoom)];
     if(!v) return;
@@ -695,7 +753,10 @@ let submitting = false;
 // The turn's chrome only starts after the player taps "Je suis prêt !" —
 // readyForKey remembers which turn was armed.
 let readyForKey = null;
-function turnKeyOf(state){ return state.code + ':' + state.phase + ':' + state.turnIndex; }
+function turnKeyOf(state){
+  if(state.chains) return state.code + ':chains:' + chainsRound(state);
+  return state.code + ':' + state.phase + ':' + state.turnIndex;
+}
 
 function clearTurnTimer(){
   if(turnTimer.iv) clearInterval(turnTimer.iv);
@@ -708,9 +769,16 @@ function manageTurnTimer(state){
   if(!state || (state.phase !== 'playing' && state.phase !== 'closing')){
     clearTurnTimer(); return;
   }
-  const idx = state.turnIndex;
-  const activeId = state.order[idx % state.order.length];
-  const mine = state.solo ? true : (activeId === myId);
+  let mine;
+  if(state.chains){
+    const {r, closing, c, mi} = currentChainCtx(state);
+    const ch = state.chains[c];
+    mine = mi >= 0 && !!ch && (closing ? !ch.finalPerception : ch.turns.length < r + 1);
+  } else {
+    const idx = state.turnIndex;
+    const activeId = state.order[idx % state.order.length];
+    mine = state.solo ? true : (activeId === myId);
+  }
   if(!mine){ clearTurnTimer(); return; }
   const key = turnKeyOf(state);
   if(readyForKey !== key){ clearTurnTimer(); return; } // waiting for the Ready tap
@@ -774,13 +842,61 @@ async function forceSubmitCurrentTurn(){
   await waitRecordingSettled();
   const state = localState;
   if(!state) return;
+  if(state.chains && state.phase === 'playing'){
+    const {r, closing} = currentChainCtx(state);
+    if(closing) await doSubmitClosing();
+    else if(r === 0) await doSubmitSeed();
+    else await doSubmitTurn();
+    return;
+  }
   if(state.phase === 'playing' && state.turnIndex === 0) await doSubmitSeed();
   else if(state.phase === 'playing') await doSubmitTurn();
   else if(state.phase === 'closing') await doSubmitClosing();
 }
 
 /* ====================== TURN SUBMISSION ====================== */
+async function doSubmitChainWord(isSeed){
+  if(submitting) return; submitting = true;
+  clearTurnTimer();
+  const btn = document.getElementById(isSeed ? 'seedSubmitBtn' : 'turnSubmitBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Envoi…'; }
+  try{
+    const state = localState;
+    const {r, c} = currentChainCtx(state);
+    const srcBlob = isSeed ? seedBlob : newWordBlob;
+    const cleanB64 = srcBlob ? await blobToCleanWavB64(srcBlob) : silentWavB64();
+    const revB64 = srcBlob ? await reverseBlobToWavB64(srcBlob) : cleanB64;
+    const turn = {
+      playerId: myId, playerName: myNameOf(state),
+      audio: cleanB64, reversedAudio: revB64,
+      attemptRestoredAudio: isSeed ? null : (attemptReversedB64 || silentWavB64()),
+      perceptionAudio: isSeed ? null : (perceptionBlob ? await blobToCleanWavB64(perceptionBlob) : silentWavB64())
+    };
+    await submitChainMsg({t:'chainTurn', chainIdx: c, pos: r, turn});
+    seedBlob=null; attemptBlob=null; newWordBlob=null; attemptReversedB64=null; perceptionBlob=null;
+  } finally { submitting = false; }
+}
+
+async function doSubmitChainClose(){
+  if(submitting) return; submitting = true;
+  clearTurnTimer();
+  const btn = document.getElementById('closingSubmitBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Envoi…'; }
+  try{
+    const state = localState;
+    const {c} = currentChainCtx(state);
+    const perception = {
+      playerName: myNameOf(state),
+      perceptionAudio: perceptionBlob ? await blobToCleanWavB64(perceptionBlob) : silentWavB64(),
+      attemptRestoredAudio: attemptReversedB64 || silentWavB64()
+    };
+    await submitChainMsg({t:'chainClose', chainIdx: c, perception});
+    attemptBlob=null; attemptReversedB64=null; perceptionBlob=null;
+  } finally { submitting = false; }
+}
+
 async function doSubmitSeed(){
+  if(localState && localState.chains) return doSubmitChainWord(true);
   if(submitting) return; submitting = true;
   clearTurnTimer();
   const btn = document.getElementById('seedSubmitBtn');
@@ -802,6 +918,7 @@ async function doSubmitSeed(){
 }
 
 async function doSubmitTurn(){
+  if(localState && localState.chains) return doSubmitChainWord(false);
   if(submitting) return; submitting = true;
   clearTurnTimer();
   const btn = document.getElementById('turnSubmitBtn');
@@ -826,6 +943,7 @@ async function doSubmitTurn(){
 }
 
 async function doSubmitClosing(){
+  if(localState && localState.chains) return doSubmitChainClose();
   if(submitting) return; submitting = true;
   clearTurnTimer();
   const btn = document.getElementById('closingSubmitBtn');
@@ -920,13 +1038,18 @@ function roomScreen(state){
         ${state.players.map(p=>`<li><span class="dot ${p.id===myId?'you':''}"></span>${p.name}${p.id===myId?' (toi)':''}${state.order[0]===p.id?' — hôte':''}</li>`).join('')}
       </ul>
       ${isHost ? `<div class="row" style="margin-top:16px;">
-        <div><label for="roundsInput">Nombre de mots</label><input type="text" id="roundsInput" inputmode="numeric" value="${state.maxTurns || 6}" maxlength="2"></div>
+        ${state.solo ? `<div><label for="roundsInput">Nombre de mots</label><input type="text" id="roundsInput" inputmode="numeric" value="${state.maxTurns || 6}" maxlength="2"></div>` : ''}
         <div><label for="recSecsInput">Temps par tour (s)</label><input type="text" id="recSecsInput" inputmode="numeric" value="${state.recSeconds || 45}" maxlength="3"></div>
       </div>
+      ${state.solo ? '' : `<p class="hint">Chacun lance son amorce, puis les chaînes tournent de joueur en joueur — autant de phrases finales que de joueurs.</p>`}
       <button class="primary" id="startBtn" ${state.players.length<2?'disabled':''}>Lancer la partie</button>
       ${state.players.length<2?'<div class="hint">Il faut au moins 2 joueurs.</div>':''}` : `<div class="hint" style="margin-top:14px;">En attente que l'hôte lance la partie…</div>`}
     </div>
     `;
+  }
+
+  if(state.phase === 'playing' && state.chains){
+    return chainsScreen(state);
   }
 
   if(state.phase === 'playing'){
@@ -976,6 +1099,34 @@ function roomScreen(state){
   if(state.phase === 'reveal'){
     return revealScreen(state);
   }
+}
+
+function chainsScreen(state){
+  const {P, r, mi, closing, c} = currentChainCtx(state);
+  const chain = state.chains[c];
+  const owner = state.players.find(p=>p.id===chain.ownerId);
+  const played = closing ? !!chain.finalPerception : (chain.turns.length >= r + 1);
+  const doneCount = closing
+    ? state.chains.filter(ch=>ch.finalPerception).length
+    : state.chains.filter(ch=>ch.turns.length >= r + 1).length;
+  const prevTurn = closing ? chain.turns[P-1] : (r > 0 ? chain.turns[r-1] : null);
+  const title = played ? "C'est envoyé !"
+    : (r === 0 ? "Lance ton amorce"
+    : (closing ? "Décode la fin de ta chaîne" : "À toi de jouer"));
+  return `
+  <div class="eyebrow">Salon ${state.code} · manche ${Math.min(r+1, P)} / ${P}${closing ? ' · clôture' : ''}</div>
+  <h2 style="font-size:22px;">${title}</h2>
+  <span class="badge yourturn" style="margin-top:8px;display:inline-block;">${closing ? 'clôture' : 'tous en même temps'}</span>
+  <span class="badge" id="turnTimerChip" style="margin-top:8px;margin-left:8px;display:none;">⏱ –</span>
+  ${(!played && r > 0 && !closing) ? `<p class="hint" style="margin-top:8px;">Tu joues sur la chaîne lancée par ${escapeHtml(owner ? owner.name : '?')}.</p>` : ''}
+  ${closing && !played ? `<p class="hint" style="margin-top:8px;">C'est TA chaîne qui revient — découvre ce que ton amorce est devenue.</p>` : ''}
+  ${played
+    ? `<div class="card"><p class="hint">Ton morceau est parti. On attend les autres… ${doneCount}/${P} ont joué cette manche.</p></div>`
+    : (readyForKey === turnKeyOf(state)
+        ? (r === 0 ? myTurnUI(true, null) : (closing ? closingUI(prevTurn) : myTurnUI(false, prevTurn)))
+        : readyUI(state, r === 0, closing))}
+  <p class="hint" style="margin-top:20px;">La manche avance quand tout le monde a joué (${doneCount}/${P}).</p>
+  `;
 }
 
 function readyUI(state, isSeed, isClosing){
@@ -1098,6 +1249,7 @@ function myTurnUI(isSeed, prevTurn){
 }
 
 function revealScreen(state){
+  if(state.chains) return chainsRevealScreen(state);
   return `
   <div class="eyebrow">Révélation</div>
   <h2 style="font-size:26px;">Le grand écart</h2>
@@ -1146,6 +1298,44 @@ function revealScreen(state){
   </div>
   ${(state.solo || state.order[0] === myId) ? `<button class="primary" id="replayBtn" style="margin-top:18px;">Rejouer avec les mêmes joueurs</button>` : `<p class="hint center" style="margin-top:18px;">L'hôte peut relancer une partie dans ce même salon.</p>`}
   <button class="ghost" id="newGameBtn" style="margin-top:10px;width:100%;">Retour à l'accueil</button>
+  `;
+}
+
+function chainsRevealScreen(state){
+  const footer = `
+  ${(state.order[0] === myId) ? `<button class="primary" id="replayBtn" style="margin-top:18px;">Rejouer avec les mêmes joueurs</button>` : `<p class="hint center" style="margin-top:18px;">L'hôte peut relancer une partie dans ce même salon.</p>`}
+  <button class="ghost" id="newGameBtn" style="margin-top:10px;width:100%;">Retour à l'accueil</button>`;
+  return `
+  <div class="eyebrow">Révélation</div>
+  <h2 style="font-size:26px;">${state.chains.length} chaînes, ${state.chains.length} grands écarts</h2>
+  ${state.chains.map((ch, ci)=>{
+    const owner = state.players.find(p=>p.id===ch.ownerId);
+    return `
+    <div class="card">
+      <div class="chain-label" style="margin-top:0;">La chaîne de ${escapeHtml(owner ? owner.name : '?')}</div>
+      <button class="primary chainPlay" data-kind="real" data-ci="${ci}">▶ La vraie phrase</button>
+      <div class="hint" id="chainStatus-real-${ci}"></div>
+      <div id="chainAudio-real-${ci}" style="display:none;"></div>
+      <button class="primary chainPlay" data-kind="perceived" data-ci="${ci}" style="margin-top:10px;">▶ La phrase perçue</button>
+      <div class="hint" id="chainStatus-perceived-${ci}"></div>
+      <div id="chainAudio-perceived-${ci}" style="display:none;"></div>
+      <div class="divider"></div>
+      ${ch.turns.map((t,i)=>`
+        <div style="margin-bottom:14px;">
+          <div class="hint">Mot ${i+1} — ${escapeHtml(t.playerName)}</div>
+          ${playerHTML(t.audio)}
+          ${t.perceptionAudio ? `<div class="hint" style="margin-top:6px;">Ce que ${escapeHtml(t.playerName)} avait compris du mot précédent</div>
+          ${playerHTML(t.perceptionAudio)}` : ''}
+        </div>
+      `).join('')}
+      ${ch.finalPerception ? `
+        <div style="margin-bottom:4px;">
+          <div class="hint">Clôture — ce que ${escapeHtml(ch.finalPerception.playerName)} a compris du dernier mot</div>
+          ${playerHTML(ch.finalPerception.perceptionAudio)}
+        </div>` : ''}
+    </div>`;
+  }).join('')}
+  ${footer}
   `;
 }
 
@@ -1227,6 +1417,11 @@ function wireEvents(){
     const state = await readRoom(currentRoom);
     state.maxTurns = readRounds();
     state.recSeconds = readRecSecs();
+    if(!state.solo){
+      // Online = Gartic-style: one chain per player, rotating each round.
+      state.chains = state.order.map(id=>({ownerId:id, turns:[]}));
+      state.maxTurns = state.order.length;
+    }
     state.phase='playing';
     await writeRoom(currentRoom, state);
     lastRenderedJson = null;
@@ -1243,7 +1438,7 @@ function wireEvents(){
   };
 
   async function stitchAndPlay(btnId, statusId, audioId, urls, emptyMsg){
-    const btn = document.getElementById(btnId);
+    const btn = typeof btnId === 'string' ? document.getElementById(btnId) : btnId;
     const status = document.getElementById(statusId);
     const audioEl = document.getElementById(audioId);
     if(!urls.length){ status.textContent = emptyMsg; return; }
@@ -1277,6 +1472,7 @@ function wireEvents(){
     state.turns = [];
     state.turnIndex = 0;
     delete state.finalPerception;
+    delete state.chains;
     state.phase = 'lobby';
     readyForKey = null;
     clearTurnTimer();
@@ -1284,6 +1480,18 @@ function wireEvents(){
     lastRenderedJson = null;
     poll();
   };
+
+  document.querySelectorAll('.chainPlay').forEach(b=>{
+    b.onclick = ()=>{
+      const ci = +b.dataset.ci, kind = b.dataset.kind;
+      const ch = localState.chains[ci];
+      const urls = kind === 'real'
+        ? ch.turns.map(t=>t.audio)
+        : ch.turns.filter(t=>t.perceptionAudio).map(t=>t.perceptionAudio)
+            .concat(ch.finalPerception ? [ch.finalPerception.perceptionAudio] : []);
+      stitchAndPlay(b, 'chainStatus-' + kind + '-' + ci, 'chainAudio-' + kind + '-' + ci, urls, 'Rien à écouter ici.');
+    };
+  });
 
   const newGameBtn = document.getElementById('newGameBtn');
   if(newGameBtn) newGameBtn.onclick = ()=>{
