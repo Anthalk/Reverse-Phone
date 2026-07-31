@@ -234,6 +234,57 @@
 
   .badge.danger{background:var(--rec);border-color:#8f1e2a;color:#fff;animation:pulse 1s ease-in-out infinite;}
 
+  .name-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .name-row input{margin-bottom:0;}
+  .rm-name{
+    flex-shrink:0;width:44px;height:48px;padding:0;
+    font-size:20px;line-height:1;
+    background:transparent;border:3px solid rgba(255,255,255,.35);color:var(--white);
+    box-shadow:0 4px 0 rgba(20,12,2,.45);
+  }
+  .rm-name:hover{background:rgba(255,77,94,.35);border-color:var(--rec);}
+
+  .reveal-card{padding:20px;}
+  .chain-title{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:18px;color:var(--sun);
+    margin-bottom:4px;
+  }
+  .phrase{
+    background:rgba(0,0,0,.22);
+    border:2px solid rgba(255,255,255,.14);
+    border-radius:18px;padding:14px;margin-top:14px;
+  }
+  .phrase-head{display:flex;align-items:center;gap:12px;}
+  .phrase-btn{
+    width:48px;height:48px;border-radius:50%;padding:0;flex-shrink:0;
+    font-size:17px;line-height:1;
+    background:var(--mint);border:3px solid var(--mint-deep);color:#063322;
+    box-shadow:0 4px 0 var(--mint-deep);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .phrase-btn:hover{background:#4beab5;}
+  .phrase-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--mint-deep);}
+  .phrase-meta{min-width:0;}
+  .phrase-label{font-family:'Baloo 2',cursive;font-weight:800;font-size:16px;line-height:1.2;}
+  .phrase-desc{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);margin-top:2px;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .chip{
+    font-size:12px;font-weight:800;
+    padding:5px 11px;border-radius:999px;
+    background:rgba(255,255,255,.1);color:rgba(255,255,255,.65);
+    border:2px solid transparent;
+    transition:background .12s, color .12s, transform .12s;
+  }
+  .chip.active{
+    background:var(--sun);color:var(--deep);border-color:var(--deep);
+    transform:translateY(-2px) scale(1.06);
+  }
+  .phrase-bar{
+    height:8px;border-radius:999px;margin-top:12px;
+    background:rgba(0,0,0,.4);overflow:hidden;
+  }
+  .phrase-fill{height:100%;width:0%;background:var(--sun);border-radius:999px;transition:width .12s linear;}
+
   .net-banner{
     position:fixed;top:0;left:0;right:0;z-index:60;
     background:var(--rec);color:#fff;
@@ -262,6 +313,195 @@
 <div id="app" class="app"></div>
 
 <script>
+/* ============================================================================
+   TOUS LES TEXTES DU JEU
+   ----------------------------------------------------------------------------
+   Tu peux modifier librement tout ce qui est entre guillemets ci-dessous.
+   Deux règles seulement :
+     1) Ne touche pas aux noms à gauche des deux-points (accueil, titre, etc.)
+     2) Garde les {accolades} : elles sont remplacées automatiquement
+        ({nom} = prénom du joueur, {code} = code du salon, etc.)
+   Rien d'autre dans ce fichier n'a besoin d'être modifié pour changer un texte.
+   ========================================================================== */
+const TEXTES = {
+
+  accueil: {
+    ongletNavigateur:   "Reverse Phone — le jeu du téléphone à l'envers",
+    surTitre:           "Le jeu du téléphone… à l'envers",
+    titre1:             "Reverse ",
+    titre2:            "Phone",
+    intro:              "Un mot circule de joueur en joueur, toujours à l'envers. Tu l'écoutes, tu l'imites, tu découvres ce que ça donne remis à l'endroit… puis tu ajoutes le tien. À la fin, on compare ce qui a vraiment été dit avec ce que tout le monde a cru entendre. Spoiler : c'est jamais pareil.",
+    labelPrenom:        "Ton prénom",
+    placeholderPrenom:  "UnSuperSurnom",
+    labelNbMots:        "Nombre de mots",
+    labelTemps:         "Temps par tour (s)",
+    boutonCreer:        "Créer un salon",
+    boutonRejoindre:    "Rejoindre",
+    titreLocal:         "Sur un seul appareil",
+    introLocal:         "Même pièce, même canapé ? Faites tourner le téléphone, chacun s'isole puis joue son tour.",
+    labelQuiJoue:       "Qui joue ?",
+    placeholderJoueur:  "Joueur {n}",
+    boutonAjouterJoueur:"+ Ajouter un joueur",
+    boutonLancerLocal:  "Lancer en local",
+    labelCodeSalon:     "Code du salon",
+    placeholderCode:    "Ex. FOXA",
+    boutonRejoindreSalon:"Rejoindre le salon",
+    sonsActives:        "🔊 Sons",
+    sonsCoupes:         "🔇 Sons",
+    invitation:         "Tu es invité au salon {code} — entre ton prénom au-dessus et clique Rejoindre.",
+    microBloqueTitre:   "Micro inaccessible ici",
+    microBloque1:       "Ton navigateur bloque le micro parce que la page n'est pas ouverte via une adresse sécurisée (https). C'est le cas quand on ouvre le fichier téléchargé directement, surtout sur téléphone.",
+    microBloque2:       "Ouvre plutôt le jeu depuis son lien https (celui qu'on t'a partagé) — depuis un fichier téléchargé, le micro reste bloqué, surtout sur téléphone."
+  },
+
+  salon: {
+    surTitreEnLigne:    "Salon",
+    surTitreLocal:      "Partie locale",
+    introLocal:         "Prêts pour un nouveau tour ? Ajuste les réglages si besoin, puis relance.",
+    introHote:          "Partage ce code à tes copains. Dès que tout le monde est là, lance la partie.",
+    introInvite:        "Partage ce code à tes copains. Dès que tout le monde est là, attends que l'hôte lance la partie.",
+    boutonCopierLien:   "Copier le lien d'invitation",
+    lienCopie:          "Lien copié !",
+    copieManuelle:      "Copie ce lien :",
+    avertissementHote:  "Détail qui compte : c'est ton onglet qui fait tourner la partie. Tu le fermes, tout s'arrête.",
+    labelJoueurs:       "Joueurs ({n})",
+    suffixeToi:         " (toi)",
+    suffixeHote:        " — hôte",
+    labelMotsParPhrase: "Mots par phrase",
+    labelTemps:         "Temps par tour (s)",
+    explicationChaines: "Chacun lance son amorce, puis les chaînes tournent — autant de phrases finales que de joueurs. Minimum {n} mots (un passage par joueur) ; au-delà, les chaînes font plusieurs tours de table.",
+    boutonLancer:       "Lancer la partie",
+    minimumJoueurs:     "Il faut au moins 2 joueurs.",
+    attenteHote:        "En attente que l'hôte lance la partie…"
+  },
+
+  pret: {
+    titre:              "Quand tu veux !",
+    auProgramme:        "Au programme : {etapes}.",
+    etapesAmorce:       "tu enregistres le tout premier mot (bien articulé !) et tu l'envoies",
+    etapesCloture:      "tu écoutes le dernier mot d'une chaîne à l'envers, tu l'imites, tu écoutes ta version remise à l'endroit, et tu dis ce que tu as compris — c'est le mot qui la clôt",
+    etapesNormal:       "tu écoutes le son reçu, tu l'imites, tu écoutes ta version remise à l'endroit, tu dis ce que tu as compris, puis tu ajoutes ton mot",
+    chrono:             "Tu auras {secondes} secondes après le compte à rebours. Là tout de suite, le chrono n'a pas commencé — souffle un coup.",
+    bouton:             "Je suis prêt !",
+    compteARebours:     ["3", "2", "1", "À toi !"]
+  },
+
+  tour: {
+    surTitre:           "Salon {code} · tour {n} / {total}",
+    titreLocal:         "📱 À {nom} de jouer",
+    titreMoi:           "C'est ton tour",
+    titreAutre:         "Au tour de {nom}",
+    badgeLocal:         "partie locale",
+    badgeMoi:           "à toi de jouer",
+    badgeAttente:       "en attente",
+    passeLAppareil:     "File l'appareil à {nom}. Les autres : on ne regarde pas !",
+    attenteAutre:       "{nom} est en train d'écouter, imiter, deviner… Ton tour approche.",
+    etiquetteTour:      "tour {n}",
+    progression:        "Révélation automatique après {total} mots — on en est à {faits}.",
+    boutonArreter:      "On s'arrête là, révélation !"
+  },
+
+  manche: {
+    surTitreMot:        "Salon {code} · mot {n} / {total}",
+    surTitreCloture:    "Salon {code} · clôture",
+    titreEnvoye:        "C'est envoyé !",
+    titreAmorce:        "Lance ton amorce",
+    titreCloture:       "Boucle la dernière chaîne",
+    titreNormal:        "À toi de jouer",
+    badgeSimultane:     "tous en même temps",
+    badgeCloture:       "clôture",
+    chaineDe:           "Tu joues sur la chaîne lancée par {nom}.",
+    clotureDe:          "Tu boucles la chaîne de {nom}. Ce qu'est devenue la tienne, tu le découvriras au reveal avec les autres.",
+    enAttente:          "Ton morceau est parti. On attend les autres… {faits}/{total} ont joué cette manche.",
+    progression:        "On avance quand tout le monde a joué ({faits}/{total})."
+  },
+
+  clotureSolo: {
+    surTitre:           "Salon {code} · dernier passage",
+    titreLocal:         "À {nom} de clore la phrase",
+    titreMoi:           "À toi de clore la phrase",
+    titreAutre:         "{nom} clôt la phrase",
+    badge:              "clôture",
+    intro:              "Tous les mots sont posés. Reste à décoder le dernier, et on découvre le résultat.",
+    attenteAutre:       "{nom} décode le dernier mot… La révélation arrive juste après."
+  },
+
+  etapes: {
+    amorceTitre:        "Donne le premier mot",
+    amorceTexte:        "Balance une expression, un mot doux, une insulte... on s'en fiche tant que c'est bien articulé. Il partira à l'envers chez le joueur suivant — il ne l'entendra jamais à l'endroit.",
+    ecouteTitre:        "Écoute ce qu'on t'a envoyé",
+    ecouteTexte:        "C'est le mot du joueur d'avant, joué à l'envers. Aucune idée de ce que c'est ? Normal.",
+    ecouteClotureTitre: "Écoute le dernier mot (à l'envers)",
+    imiteTitre:         "Imite-le à voix haute",
+    imiteTexte:         "Reproduis ce charabia du mieux que tu peux.",
+    imiteClotureTitre:  "Essaie de le reproduire à voix haute",
+    reecouteTitre:      "Écoute ta tentative remise à l'endroit",
+    reecouteTexte:      "Ton seul vrai indice sur ce qui a été dit au départ. Tends l'oreille.",
+    comprisTitre:       "Dis ce que tu as compris",
+    comprisTexte:       "Prononce clairement ce que tu crois avoir entendu, c'est ce qui finira dans la phrase du groupe.",
+    comprisClotureTitre:"Dis proprement ce que tu as compris",
+    comprisClotureTexte:"La toute dernière brique de cette chaîne-là.",
+    ajouteTitre:        "Ajoute ta contribution à la chaîne",
+    ajouteTexte:        "À toi de jouer : tes douces paroles partiront à l'envers chez le joueur suivant."
+  },
+
+  enregistrement: {
+    boutonAmorce:       "● Enregistrer",
+    boutonTentative:    "● Enregistrer ma tentative",
+    boutonCompris:      "● Enregistrer ce que j'ai compris",
+    boutonMot:          "● Enregistrer mon mot",
+    boutonArreter:      "■ Arrêter",
+    boutonRefaire:      "● Ré-enregistrer",
+    enCours:            "Enregistrement…",
+    enCoursTentative:   "Enregistrement de ta tentative…",
+    termine:            "Enregistré ✓",
+    inversionEnCours:   "Une seconde, je le retourne…",
+    tentativeOk:        "Tentative enregistrée ✓",
+    erreurMicro:        "Erreur micro : ",
+    boutonEnvoyer:      "Envoyer au joueur suivant",
+    boutonReveler:      "Révéler la phrase",
+    envoiEnCours:       "Envoi…",
+    assemblage:         "Assemblage…"
+  },
+
+  reveal: {
+    surTitre:           "Révélation",
+    titre:              "Le grand écart",
+    introSolo:          "Une phrase est partie de main en main. Voilà les deux versions.",
+    introChaines:       "{n} amorces sont parties dans la nature. Voilà ce qu'elles sont devenues.",
+    chaineDe:           "Chaîne lancée par {nom}",
+    vraieTitre:         "Ce qui a vraiment été dit",
+    vraieTexte:         "Les vrais mots, bout à bout",
+    percueTitre:        "Ce que c'est devenu",
+    percueTexte:        "Ce que chacun a cru entendre",
+    boutonRejouer:      "Rejouer avec les mêmes joueurs",
+    hoteRelance:        "L'hôte peut relancer une partie dans ce même salon.",
+    boutonAccueil:      "Retour à l'accueil"
+  },
+
+  erreurs: {
+    prenomManquant:     "Entre ton prénom d'abord.",
+    codeManquant:       "Entre un code de salon.",
+    deuxJoueursMini:    "Il faut au moins 2 joueurs.",
+    reseauIndisponible: "Impossible de charger le module réseau — vérifie ta connexion et recharge la page.",
+    creationImpossible: "Impossible de créer le salon ({raison}). Réessaie.",
+    connexionEnCours:   "Connexion au salon {code}…",
+    salonIntrouvable:   "Salon introuvable — vérifie le code, et que l'hôte a bien son onglet ouvert.",
+    hotePerdu:          "⚠️ On a perdu l'hôte… La partie s'arrête ici.",
+    microContexte:      "micro bloqué — ouvre le jeu via une adresse https (pas un fichier local)",
+    lectureImpossible:  "lecture du son impossible",
+    rienAEcouter:       "Rien à écouter ici.",
+    erreurGenerique:    "Erreur : "
+  }
+};
+
+// Remplace les {accolades} d'un texte par les valeurs fournies.
+function tx(str, vars){
+  if(!vars) return str;
+  return String(str).replace(/\{(\w+)\}/g, (m, k)=> (k in vars ? vars[k] : m));
+}
+const T = TEXTES;
+
 /* ====================== AUDIO HELPERS ====================== */
 let audioCtx = null;
 function getCtx(){
@@ -275,7 +515,7 @@ function getCtx(){
 let micStream = null;
 async function ensureMic(){
   if(!micAvailable()){
-    throw new Error("micro bloqué — ouvre le jeu via une adresse https (pas un fichier local)");
+    throw new Error(T.erreurs.microContexte);
   }
   if(!micStream || !micStream.active){
     micStream = await navigator.mediaDevices.getUserMedia({audio:true});
@@ -365,10 +605,43 @@ async function blobToCleanWavB64(blob){
   return audioBufferToWavBase64(buf);
 }
 
+// MediaRecorder already gives us compressed audio (Opus, ~30x smaller than
+// raw WAV). We transmit THAT as-is and compute reversals locally at playback
+// time — the state stays small enough to fly over a phone connection.
+function blobToDataUrl(blob){
+  return new Promise((res, rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>res(r.result);
+    r.onerror = ()=>rej(new Error(T.erreurs.lectureImpossible));
+    r.readAsDataURL(blob);
+  });
+}
+
+function audioBufferToWavBlob(buffer){
+  const b64 = audioBufferToWavBase64(buffer);
+  const bin = atob(b64.split(',')[1]);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], {type:'audio/wav'});
+}
+
+// Lazy, cached reversal: a clip is only decoded+reversed the first time
+// someone actually presses play on it.
+const reversedCache = new Map();
+async function getReversedUrl(src){
+  if(reversedCache.has(src)) return reversedCache.get(src);
+  const resp = await fetch(src);
+  const blob = await resp.blob();
+  const buf = await blobToAudioBuffer(blob);
+  const url = URL.createObjectURL(audioBufferToWavBlob(reverseBuffer(buf)));
+  reversedCache.set(src, url);
+  return url;
+}
+
 /* --------- Custom themed audio player (replaces native <audio>) --------- */
 function fmtTime(s){ s = Math.floor(s||0); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
-function playerHTML(src){
-  return `<div class="player" data-src="${src}">
+function playerHTML(src, reverse){
+  return `<div class="player" data-src="${src}" data-reverse="${reverse ? '1' : '0'}">
     <button class="pbtn" type="button" aria-label="Lire">▶</button>
     <div class="pbar"><div class="pfill"></div></div>
     <span class="ptime">0:00</span>
@@ -381,7 +654,7 @@ function resetActivePlayer(){
   }
   activePlayerEl = null;
 }
-document.addEventListener('click', (e)=>{
+document.addEventListener('click', async (e)=>{
   const btn = e.target.closest('.pbtn');
   if(!btn) return;
   const wrap = btn.closest('.player');
@@ -391,6 +664,13 @@ document.addEventListener('click', (e)=>{
     return;
   }
   if(sharedAudio){ sharedAudio.pause(); resetActivePlayer(); }
+  if(wrap.dataset.reverse === '1' && wrap.dataset.resolved !== '1'){
+    btn.textContent = '…';
+    try{
+      wrap.dataset.src = await getReversedUrl(wrap.dataset.src);
+      wrap.dataset.resolved = '1';
+    }catch(err){ btn.textContent = '▶'; return; }
+  }
   sharedAudio = new Audio(wrap.dataset.src);
   activePlayerEl = wrap;
   btn.textContent = '⏸';
@@ -452,14 +732,65 @@ async function concatDataUrls(urls){
   const totalLen = buffers.reduce((s,b)=>s+b.length, 0) + gap * (buffers.length - 1);
   const out = ctx.createBuffer(1, totalLen, ctx.sampleRate);
   const dst = out.getChannelData(0);
+  const segs = [];
   let offset = 0;
   for(let i=0;i<buffers.length;i++){
     const src = buffers[i].getChannelData(0);
     dst.set(src, offset);
+    segs.push({start: offset / ctx.sampleRate, end: (offset + buffers[i].length) / ctx.sampleRate});
     offset += buffers[i].length + gap;
   }
-  return audioBufferToWavBase64(out);
+  return {url: URL.createObjectURL(audioBufferToWavBlob(out)), segs};
 }
+
+/* ====================== SOUND DESIGN (synthesized, no assets) ====================== */
+let sfxOn = true;
+try{ sfxOn = localStorage.getItem('rp-sfx') !== 'off'; }catch(e){}
+function setSfx(on){
+  sfxOn = on;
+  try{ localStorage.setItem('rp-sfx', on ? 'on' : 'off'); }catch(e){}
+}
+function blip(freq, dur, type, vol, delay){
+  if(!sfxOn) return;
+  try{
+    const ctx = getCtx();
+    const t0 = ctx.currentTime + (delay || 0);
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(vol || 0.13, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + (dur || 0.12));
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(t0); osc.stop(t0 + (dur || 0.12) + 0.02);
+  }catch(e){}
+}
+function sweep(from, to, dur){
+  if(!sfxOn) return;
+  try{
+    const ctx = getCtx();
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(from, t0);
+    osc.frequency.exponentialRampToValueAtTime(to, t0 + dur);
+    g.gain.setValueAtTime(0.11, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.02);
+  }catch(e){}
+}
+const SFX = {
+  tick:    ()=>blip(520, 0.09, 'square', 0.09),
+  go:      ()=>{ blip(660,0.14,'square',0.12,0); blip(880,0.2,'square',0.12,0.1); },
+  recOn:   ()=>blip(300, 0.1, 'sine', 0.12),
+  recOff:  ()=>blip(620, 0.1, 'sine', 0.12),
+  sent:    ()=>sweep(420, 1100, 0.22),
+  urgent:  ()=>blip(880, 0.07, 'square', 0.1),
+  reveal:  ()=>{ [523,659,784,1046].forEach((f,i)=>blip(f,0.3,'triangle',0.11,i*0.13)); }
+};
 
 /* ====================== STATE / STORAGE ====================== */
 const myId = 'p_' + Math.random().toString(36).slice(2,10);
@@ -498,18 +829,35 @@ function hostBroadcast(json){
 /* --------- Gartic-style parallel chains (online mode) --------- */
 // P players -> P chains. Round r: player i plays on chain (i - r) mod P.
 // Closing round (r = P): each player decodes the END of their OWN chain.
+// P players -> P chains. The phrase length N (words per chain) is chosen by
+// the host and can exceed P: chains simply do several laps around the table.
+//   r = 0      : everyone seeds their OWN chain
+//   r = 1..N-1 : word turns, chains rotate one step per round
+//   r = N      : closing round (perception only)
+// Chain played at round r by player i: (i - r) mod P — always a rotation,
+// so every chain is covered exactly once per round.
+function chainWords(state){ return state.maxTurns || state.order.length; }
 function chainsRound(state){
-  const P = state.order.length;
-  const minLen = Math.min.apply(null, state.chains.map(c=>c.turns.length));
-  return Math.min(minLen, P);
+  const N = chainWords(state);
+  const words = Math.min.apply(null, state.chains.map(c=>c.turns.length));
+  return Math.min(words, N); // r === N means: closing round
+}
+// A rotation by N would land everyone back on their OWN chain whenever N is a
+// multiple of P — shift by one more so the closing round is always a
+// derangement (nobody ever closes the chain they started).
+function closingOffset(state){
+  const P = state.order.length, N = chainWords(state);
+  return (N % P === 0) ? N + 1 : N;
 }
 function currentChainCtx(state){
   const P = state.order.length;
+  const N = chainWords(state);
   const r = chainsRound(state);
   const mi = state.order.indexOf(myId);
-  const closing = r >= P;
-  const c = closing ? mi : ((mi - r) % P + P) % P;
-  return {P, r, mi, closing, c};
+  const closing = r >= N;
+  const off = closing ? closingOffset(state) : r;
+  const c = ((mi - off) % P + P) % P;
+  return {P, N, r, mi, closing, c};
 }
 // Parallel submissions can't overwrite the full state (they'd clobber each
 // other) — chain turns travel as targeted messages the host merges.
@@ -524,6 +872,7 @@ function applyChainMsg(state, msg){
   }
 }
 async function submitChainMsg(msg){
+  SFX.sent();
   if(net.mode === 'guest'){
     if(net.cache){
       const state = JSON.parse(net.cache);
@@ -615,7 +964,7 @@ function readRecSecs(){
 
 async function createRoom(){
   if(typeof Peer === 'undefined'){
-    showLandingError("Impossible de charger le module réseau — vérifie ta connexion et recharge la page.");
+    showLandingError(T.erreurs.reseauIndisponible);
     resetLandingButtons(); return;
   }
   teardownNet();
@@ -641,7 +990,7 @@ async function createRoom(){
       if(err && err.type === 'unavailable-id' && attempts < 3){
         attempts++; try{peer.destroy();}catch(e){} tryCode();
       } else {
-        showLandingError("Impossible de créer le salon (" + (err && err.type || 'erreur réseau') + "). Réessaie.");
+        showLandingError(tx(T.erreurs.creationImpossible, {raison: (err && err.type) || 'erreur réseau'}));
         try{peer.destroy();}catch(e){}
         teardownNet(); resetLandingButtons();
       }
@@ -650,15 +999,15 @@ async function createRoom(){
   tryCode();
 }
 
-async function createLocalRoom(numPlayers){
+async function createLocalRoom(names){
   teardownNet();
   net.mode = 'local';
   let code = randomCode();
-  const players = [{id:myId, name: myName || 'Joueur 1'}];
+  const players = [{id:myId, name: names[0]}];
   const order = [myId];
-  for(let i=2;i<=numPlayers;i++){
-    const localId = 'local_' + i;
-    players.push({id:localId, name:'Joueur ' + i});
+  for(let i=1;i<names.length;i++){
+    const localId = 'local_' + (i+1);
+    players.push({id:localId, name: names[i]});
     order.push(localId);
   }
   const state = {
@@ -672,11 +1021,11 @@ async function createLocalRoom(numPlayers){
 async function joinRoom(code){
   code = code.trim().toUpperCase();
   if(typeof Peer === 'undefined'){
-    showLandingError("Impossible de charger le module réseau — vérifie ta connexion et recharge la page.");
+    showLandingError(T.erreurs.reseauIndisponible);
     resetLandingButtons(); return;
   }
   teardownNet();
-  showLandingError('Connexion au salon ' + code + '…');
+  showLandingError(tx(T.erreurs.connexionEnCours, {code: code}));
   const peer = new Peer();
   let settled = false;
   const fail = (msg)=>{
@@ -700,20 +1049,20 @@ async function joinRoom(code){
       }
     });
     conn.on('close', ()=>{
-      if(currentRoom) showNetBanner("⚠️ On a perdu l'hôte… La partie s'arrête ici.");
+      if(currentRoom) showNetBanner(T.erreurs.hotePerdu);
     });
   });
   peer.on('error', err=>{
-    fail("Salon introuvable — vérifie le code, et que l'hôte a bien son onglet ouvert.");
+    fail(T.erreurs.salonIntrouvable);
   });
-  setTimeout(()=>fail("Salon introuvable — vérifie le code, et que l'hôte a bien son onglet ouvert."), 10000);
+  setTimeout(()=>fail(T.erreurs.salonIntrouvable), 10000);
 }
 
 function resetLandingButtons(){
   const c = document.getElementById('createBtn');
-  if(c){ c.disabled=false; c.textContent='Créer un salon'; }
+  if(c){ c.disabled=false; c.textContent=T.accueil.boutonCreer; }
   const j = document.getElementById('joinBtn');
-  if(j){ j.disabled=false; j.textContent='Rejoindre le salon'; }
+  if(j){ j.disabled=false; j.textContent=T.accueil.boutonRejoindreSalon; }
   const l = document.getElementById('localBtn');
   if(l){ l.disabled=false; }
 }
@@ -731,6 +1080,7 @@ function enterRoom(code){
 }
 
 let lastRenderedJson = null;
+let lastPhaseSeen = null;
 let isRecording = false;
 
 async function poll(){
@@ -742,9 +1092,12 @@ async function poll(){
   // Re-render ONLY if the shared state actually changed, and never mid-recording:
   // re-rendering rebuilds the DOM, which wipes text inputs and recording buttons.
   if(json === lastRenderedJson || isRecording) return;
+  const wasPhase = lastPhaseSeen;
+  lastPhaseSeen = state.phase;
   lastRenderedJson = json;
   render(roomScreen(state));
   manageTurnTimer(state);
+  if(state.phase === 'reveal' && wasPhase !== 'reveal') SFX.reveal();
 }
 
 /* ====================== TURN TIMER ====================== */
@@ -794,12 +1147,13 @@ function startCountdownOverlay(cb){
   ov.innerHTML = '<div class="go-num">3</div>';
   document.body.appendChild(ov);
   const num = ov.querySelector('.go-num');
-  const seq = ['3','2','1','À toi !'];
+  const seq = T.pret.compteARebours;
   let i = 0;
   const step = ()=>{
     if(i >= seq.length){ ov.remove(); cb(); return; }
     num.textContent = seq[i];
     num.classList.remove('pop'); void num.offsetWidth; num.classList.add('pop');
+    (i === seq.length - 1) ? SFX.go() : SFX.tick();
     i++;
     setTimeout(step, 700);
   };
@@ -814,8 +1168,13 @@ function startTurnClock(state){
     const chip = document.getElementById('turnTimerChip');
     if(chip){
       chip.style.display = 'inline-block';
+      const prevLeft = chip.dataset.left;
       chip.textContent = '⏱ ' + left + ' s';
       chip.classList.toggle('danger', left <= 5);
+      if(prevLeft !== String(left)){
+        chip.dataset.left = String(left);
+        if(left <= 5 && left > 0) SFX.urgent();
+      }
     }
     if(left <= 0){
       if(turnTimer.iv) clearInterval(turnTimer.iv);
@@ -859,18 +1218,15 @@ async function doSubmitChainWord(isSeed){
   if(submitting) return; submitting = true;
   clearTurnTimer();
   const btn = document.getElementById(isSeed ? 'seedSubmitBtn' : 'turnSubmitBtn');
-  if(btn){ btn.disabled = true; btn.textContent = 'Envoi…'; }
+  if(btn){ btn.disabled = true; btn.textContent = T.enregistrement.envoiEnCours; }
   try{
     const state = localState;
     const {r, c} = currentChainCtx(state);
     const srcBlob = isSeed ? seedBlob : newWordBlob;
-    const cleanB64 = srcBlob ? await blobToCleanWavB64(srcBlob) : silentWavB64();
-    const revB64 = srcBlob ? await reverseBlobToWavB64(srcBlob) : cleanB64;
     const turn = {
       playerId: myId, playerName: myNameOf(state),
-      audio: cleanB64, reversedAudio: revB64,
-      attemptRestoredAudio: isSeed ? null : (attemptReversedB64 || silentWavB64()),
-      perceptionAudio: isSeed ? null : (perceptionBlob ? await blobToCleanWavB64(perceptionBlob) : silentWavB64())
+      audio: srcBlob ? await blobToDataUrl(srcBlob) : silentWavB64(),
+      perceptionAudio: isSeed ? null : (perceptionBlob ? await blobToDataUrl(perceptionBlob) : silentWavB64())
     };
     await submitChainMsg({t:'chainTurn', chainIdx: c, pos: r, turn});
     seedBlob=null; attemptBlob=null; newWordBlob=null; attemptReversedB64=null; perceptionBlob=null;
@@ -881,14 +1237,13 @@ async function doSubmitChainClose(){
   if(submitting) return; submitting = true;
   clearTurnTimer();
   const btn = document.getElementById('closingSubmitBtn');
-  if(btn){ btn.disabled = true; btn.textContent = 'Envoi…'; }
+  if(btn){ btn.disabled = true; btn.textContent = T.enregistrement.envoiEnCours; }
   try{
     const state = localState;
     const {c} = currentChainCtx(state);
     const perception = {
       playerName: myNameOf(state),
-      perceptionAudio: perceptionBlob ? await blobToCleanWavB64(perceptionBlob) : silentWavB64(),
-      attemptRestoredAudio: attemptReversedB64 || silentWavB64()
+      perceptionAudio: perceptionBlob ? await blobToDataUrl(perceptionBlob) : silentWavB64()
     };
     await submitChainMsg({t:'chainClose', chainIdx: c, perception});
     attemptBlob=null; attemptReversedB64=null; perceptionBlob=null;
@@ -900,14 +1255,13 @@ async function doSubmitSeed(){
   if(submitting) return; submitting = true;
   clearTurnTimer();
   const btn = document.getElementById('seedSubmitBtn');
-  if(btn){ btn.disabled = true; btn.textContent = 'Envoi…'; }
+  if(btn){ btn.disabled = true; btn.textContent = T.enregistrement.envoiEnCours; }
   try{
-    const cleanB64 = seedBlob ? await blobToCleanWavB64(seedBlob) : silentWavB64();
-    const revB64 = seedBlob ? await reverseBlobToWavB64(seedBlob) : cleanB64;
+    const cleanB64 = seedBlob ? await blobToDataUrl(seedBlob) : silentWavB64();
     const state = await readRoom(currentRoom);
     const activeId = state.order[state.turnIndex % state.order.length];
     const activeName = state.players.find(p=>p.id===activeId).name;
-    state.turns.push({playerId:activeId, playerName:activeName, audio:cleanB64, reversedAudio:revB64, attemptRestoredAudio:null});
+    state.turns.push({playerId:activeId, playerName:activeName, audio:cleanB64});
     state.turnIndex = 1;
     if(state.maxTurns && state.turns.length >= state.maxTurns) state.phase = 'closing';
     await writeRoom(currentRoom, state);
@@ -922,17 +1276,15 @@ async function doSubmitTurn(){
   if(submitting) return; submitting = true;
   clearTurnTimer();
   const btn = document.getElementById('turnSubmitBtn');
-  if(btn){ btn.disabled = true; btn.textContent = 'Envoi…'; }
+  if(btn){ btn.disabled = true; btn.textContent = T.enregistrement.envoiEnCours; }
   try{
-    const cleanB64 = newWordBlob ? await blobToCleanWavB64(newWordBlob) : silentWavB64();
-    const revB64 = newWordBlob ? await reverseBlobToWavB64(newWordBlob) : cleanB64;
-    const perceptionB64 = perceptionBlob ? await blobToCleanWavB64(perceptionBlob) : silentWavB64();
-    const restored = attemptReversedB64 || silentWavB64();
+    const cleanB64 = newWordBlob ? await blobToDataUrl(newWordBlob) : silentWavB64();
+    const perceptionB64 = perceptionBlob ? await blobToDataUrl(perceptionBlob) : silentWavB64();
     const state = await readRoom(currentRoom);
     const myTurnIdx = state.turnIndex;
     const activeId = state.order[myTurnIdx % state.order.length];
     const activeName = state.players.find(p=>p.id===activeId).name;
-    state.turns.push({playerId:activeId, playerName:activeName, audio:cleanB64, reversedAudio:revB64, attemptRestoredAudio:restored, perceptionAudio:perceptionB64});
+    state.turns.push({playerId:activeId, playerName:activeName, audio:cleanB64, perceptionAudio:perceptionB64});
     state.turnIndex = myTurnIdx + 1;
     if(state.maxTurns && state.turns.length >= state.maxTurns) state.phase = 'closing';
     await writeRoom(currentRoom, state);
@@ -947,14 +1299,13 @@ async function doSubmitClosing(){
   if(submitting) return; submitting = true;
   clearTurnTimer();
   const btn = document.getElementById('closingSubmitBtn');
-  if(btn){ btn.disabled = true; btn.textContent = 'Assemblage…'; }
+  if(btn){ btn.disabled = true; btn.textContent = T.enregistrement.assemblage; }
   try{
-    const perceptionB64 = perceptionBlob ? await blobToCleanWavB64(perceptionBlob) : silentWavB64();
-    const restored = attemptReversedB64 || silentWavB64();
+    const perceptionB64 = perceptionBlob ? await blobToDataUrl(perceptionBlob) : silentWavB64();
     const state = await readRoom(currentRoom);
     const activeId = state.order[state.turnIndex % state.order.length];
     const activeName = state.players.find(p=>p.id===activeId).name;
-    state.finalPerception = {playerName:activeName, perceptionAudio:perceptionB64, attemptRestoredAudio:restored};
+    state.finalPerception = {playerName:activeName, perceptionAudio:perceptionB64};
     state.phase = 'reveal';
     await writeRoom(currentRoom, state);
     attemptBlob=null; attemptReversedB64=null; perceptionBlob=null;
@@ -974,50 +1325,71 @@ function micAvailable(){
 function landingScreen(){
   const micWarning = micAvailable() ? '' : `
   <div class="card" style="border-color:var(--rec);">
-    <div class="step-title">Micro inaccessible ici</div>
-    <p class="hint">Ton navigateur bloque le micro parce que la page n'est pas ouverte via une adresse sécurisée (https). C'est le cas quand on ouvre le fichier téléchargé directement, surtout sur téléphone.</p>
-    <p class="hint">Ouvre plutôt le jeu depuis son lien https (celui qu'on t'a partagé) — depuis un fichier téléchargé, le micro reste bloqué, surtout sur téléphone.</p>
+    <div class="step-title">${T.accueil.microBloqueTitre}</div>
+    <p class="hint">${T.accueil.microBloque1}</p>
+    <p class="hint">${T.accueil.microBloque2}</p>
   </div>`;
   return micWarning + `
-  <div class="eyebrow">Le jeu du téléphone… à l'envers</div>
-  <div class="title-flip" id="titleFlip">Reverse <span class="mirror">Phone</span></div>
-  <p class="subtitle">Un mot circule de joueur en joueur, toujours à l'envers. Tu l'écoutes, tu l'imites, tu découvres ce que ça donne remis à l'endroit… puis tu ajoutes le tien. À la fin, on compare ce qui a vraiment été dit avec ce que tout le monde a cru entendre. Spoiler : c'est jamais pareil.</p>
+  <button class="ghost" id="sfxToggle" style="float:right;padding:8px 14px;font-size:13px;">${sfxOn ? T.accueil.sonsActives : T.accueil.sonsCoupes}</button>
+  <div class="eyebrow">${T.accueil.surTitre}</div>
+  <div class="title-flip" id="titleFlip">${T.accueil.titre1}<span class="mirror">${T.accueil.titre2}</span></div>
+  <p class="subtitle">${T.accueil.intro}</p>
   <div class="card">
-    <label for="nameInput">Ton prénom</label>
-    <input type="text" id="nameInput" placeholder="UnSuperSurnom" maxlength="20">
+    <label for="nameInput">${T.accueil.labelPrenom}</label>
+    <input type="text" id="nameInput" placeholder="${T.accueil.placeholderPrenom}" maxlength="20">
     <div class="row">
       <div>
-        <label for="roundsInput">Nombre de mots</label>
+        <label for="roundsInput">${T.accueil.labelNbMots}</label>
         <input type="text" id="roundsInput" inputmode="numeric" value="6" maxlength="2">
       </div>
       <div>
-        <label for="recSecsInput">Temps par tour (s)</label>
+        <label for="recSecsInput">${T.accueil.labelTemps}</label>
         <input type="text" id="recSecsInput" inputmode="numeric" value="45" maxlength="3">
       </div>
     </div>
     <div class="row">
-      <button class="primary" id="createBtn">Créer un salon</button>
-      <button class="ghost" id="joinToggle">Rejoindre</button>
+      <button class="primary" id="createBtn">${T.accueil.boutonCreer}</button>
+      <button class="ghost" id="joinToggle">${T.accueil.boutonRejoindre}</button>
     </div>
     <div class="divider"></div>
-    <label>Sur un seul appareil</label>
-    <p class="hint" style="margin-top:-4px;">Même pièce, même canapé ? Faites tourner le téléphone, chacun s'isole puis joue son tour.</p>
-    <div class="row" style="margin-top:10px;align-items:flex-end;">
-      <div>
-        <label for="localPlayersInput">Joueurs</label>
-        <input type="text" id="localPlayersInput" inputmode="numeric" value="3" maxlength="1" style="margin-bottom:0;">
-      </div>
-      <button class="ghost" id="localBtn">Lancer en local</button>
-    </div>
+    <label>${T.accueil.titreLocal}</label>
+    <p class="hint" style="margin-top:-4px;">${T.accueil.introLocal}</p>
+    <label style="margin-top:14px;">${T.accueil.labelQuiJoue}</label>
+    <div id="localNames"></div>
+    <button class="ghost" id="addPlayerBtn" style="width:100%;margin-bottom:12px;">${T.accueil.boutonAjouterJoueur}</button>
+    <button class="primary" id="localBtn">${T.accueil.boutonLancerLocal}</button>
     <div id="joinBox" style="display:none;margin-top:16px;">
-      <label for="codeInput">Code du salon</label>
-      <input type="text" id="codeInput" placeholder="Ex. FOXA" maxlength="4" style="text-transform:uppercase;">
-      <button class="primary" id="joinBtn">Rejoindre le salon</button>
+      <label for="codeInput">${T.accueil.labelCodeSalon}</label>
+      <input type="text" id="codeInput" placeholder="${T.accueil.placeholderCode}" maxlength="4" style="text-transform:uppercase;">
+      <button class="primary" id="joinBtn">${T.accueil.boutonRejoindreSalon}</button>
     </div>
     <div id="landingError" class="error"></div>
   </div>
   `;
 }
+const DEFAULT_LOCAL_NAMES = ['', '', ''];
+let localNames = DEFAULT_LOCAL_NAMES.slice();
+
+function renderLocalNames(){
+  const box = document.getElementById('localNames');
+  if(!box) return;
+  box.innerHTML = localNames.map((n, i)=>`
+    <div class="name-row">
+      <input type="text" class="local-name" data-i="${i}" maxlength="20"
+             placeholder="${tx(T.accueil.placeholderJoueur, {n: i+1})}" value="${escapeHtml(n)}">
+      ${localNames.length > 2 ? `<button class="rm-name" data-i="${i}" aria-label="Retirer">×</button>` : ''}
+    </div>`).join('');
+  box.querySelectorAll('.local-name').forEach(inp=>{
+    inp.oninput = ()=>{ localNames[+inp.dataset.i] = inp.value; };
+  });
+  box.querySelectorAll('.rm-name').forEach(btn=>{
+    btn.onclick = ()=>{
+      localNames.splice(+btn.dataset.i, 1);
+      renderLocalNames();
+    };
+  });
+}
+
 function joinScreen(err){ const h = landingScreen(); return h.replace('<div class="error" id="landingError"></div>', ''); }
 
 function roomScreen(state){
@@ -1027,23 +1399,23 @@ function roomScreen(state){
 
   if(state.phase === 'lobby'){
     return `
-    <div class="eyebrow">Salon</div>
-    <div class="roomcode">${state.code}</div>
-    <p class="subtitle">Partage ce code à tes copains. Dès que tout le monde est là, ${isHost ? 'lance la partie.' : "attends que l'hôte lance la partie."}</p>
-    ${(!state.solo && location.protocol.startsWith('http')) ? `<div style="margin-top:12px;"><button class="ghost" id="copyInviteBtn">Copier le lien d'invitation</button><span class="small" id="copyStatus" style="margin-left:10px;"></span></div>` : ''}
-    ${isHost ? `<p class="hint">Détail qui compte : c'est ton onglet qui fait tourner la partie. Tu le fermes, tout s'arrête.</p>` : ''}
+    <div class="eyebrow">${state.solo ? T.salon.surTitreLocal : T.salon.surTitreEnLigne}</div>
+    ${state.solo ? '' : `<div class="roomcode">${state.code}</div>`}
+    <p class="subtitle">${state.solo ? T.salon.introLocal : (isHost ? T.salon.introHote : T.salon.introInvite)}</p>
+    ${(!state.solo && location.protocol.startsWith('http')) ? `<div style="margin-top:12px;"><button class="ghost" id="copyInviteBtn">${T.salon.boutonCopierLien}</button><span class="small" id="copyStatus" style="margin-left:10px;"></span></div>` : ''}
+    ${(isHost && !state.solo) ? `<p class="hint">${T.salon.avertissementHote}</p>` : ''}
     <div class="card">
-      <label>Joueurs (${state.players.length})</label>
+      <label>${tx(T.salon.labelJoueurs, {n: state.players.length})}</label>
       <ul class="players">
-        ${state.players.map(p=>`<li><span class="dot ${p.id===myId?'you':''}"></span>${p.name}${p.id===myId?' (toi)':''}${state.order[0]===p.id?' — hôte':''}</li>`).join('')}
+        ${state.players.map(p=>`<li><span class="dot ${p.id===myId?'you':''}"></span>${p.name}${p.id===myId?T.salon.suffixeToi:''}${state.order[0]===p.id?T.salon.suffixeHote:''}</li>`).join('')}
       </ul>
       ${isHost ? `<div class="row" style="margin-top:16px;">
-        ${state.solo ? `<div><label for="roundsInput">Nombre de mots</label><input type="text" id="roundsInput" inputmode="numeric" value="${state.maxTurns || 6}" maxlength="2"></div>` : ''}
-        <div><label for="recSecsInput">Temps par tour (s)</label><input type="text" id="recSecsInput" inputmode="numeric" value="${state.recSeconds || 45}" maxlength="3"></div>
+        <div><label for="roundsInput">${T.salon.labelMotsParPhrase}</label><input type="text" id="roundsInput" inputmode="numeric" value="${state.maxTurns || Math.max(state.players.length, 4)}" maxlength="2"></div>
+        <div><label for="recSecsInput">${T.salon.labelTemps}</label><input type="text" id="recSecsInput" inputmode="numeric" value="${state.recSeconds || 45}" maxlength="3"></div>
       </div>
-      ${state.solo ? '' : `<p class="hint">Chacun lance son amorce, puis les chaînes tournent de joueur en joueur — autant de phrases finales que de joueurs.</p>`}
-      <button class="primary" id="startBtn" ${state.players.length<2?'disabled':''}>Lancer la partie</button>
-      ${state.players.length<2?'<div class="hint">Il faut au moins 2 joueurs.</div>':''}` : `<div class="hint" style="margin-top:14px;">En attente que l'hôte lance la partie…</div>`}
+      ${state.solo ? '' : `<p class="hint">${tx(T.salon.explicationChaines, {n: state.players.length})}</p>`}
+      <button class="primary" id="startBtn" ${state.players.length<2?'disabled':''}>${T.salon.boutonLancer}</button>
+      ${state.players.length<2?`<div class="hint">${T.salon.minimumJoueurs}</div>`:''}` : `<div class="hint" style="margin-top:14px;">${T.salon.attenteHote}</div>`}
     </div>
     `;
   }
@@ -1063,20 +1435,20 @@ function roomScreen(state){
     const canReveal = state.turns.length >= state.order.length;
 
     return `
-    <div class="eyebrow">Salon ${state.code} · tour ${turnIdx+1} / ${state.maxTurns || '∞'}</div>
-    <h2 style="font-size:22px;">${state.solo ? `📱 À ${activePlayer.name} de jouer` : (isMyTurn ? "C'est ton tour" : `Au tour de ${activePlayer.name}`)}</h2>
-    <span class="badge yourturn" style="margin-top:8px;display:inline-block;">${state.solo ? 'partie locale' : (isMyTurn?'à toi de jouer':'en attente')}</span>
+    <div class="eyebrow">${tx(T.tour.surTitre, {code: state.code, n: turnIdx+1, total: state.maxTurns || '∞'})}</div>
+    <h2 style="font-size:22px;">${state.solo ? tx(T.tour.titreLocal, {nom: activePlayer.name}) : (isMyTurn ? T.tour.titreMoi : tx(T.tour.titreAutre, {nom: activePlayer.name}))}</h2>
+    <span class="badge yourturn" style="margin-top:8px;display:inline-block;">${state.solo ? T.tour.badgeLocal : (isMyTurn?T.tour.badgeMoi:T.tour.badgeAttente)}</span>
     <span class="badge" id="turnTimerChip" style="margin-top:8px;margin-left:8px;display:none;">⏱ –</span>
-    ${state.solo ? `<p class="hint" style="margin-top:8px;">File l'appareil à ${activePlayer.name}. Les autres : on ne regarde pas !</p>` : ''}
+    ${state.solo ? `<p class="hint" style="margin-top:8px;">${tx(T.tour.passeLAppareil, {nom: activePlayer.name})}</p>` : ''}
 
-    ${isMyTurn ? (readyForKey === turnKeyOf(state) ? myTurnUI(isSeed, prevTurn) : readyUI(state, isSeed, false)) : `<div class="card"><p class="hint">${activePlayer.name} est en train d'écouter, imiter, deviner… Ton tour approche.</p></div>`}
+    ${isMyTurn ? (readyForKey === turnKeyOf(state) ? myTurnUI(isSeed, prevTurn) : readyUI(state, isSeed, false)) : `<div class="card"><p class="hint">${tx(T.tour.attenteAutre, {nom: activePlayer.name})}</p></div>`}
 
     <div class="ticket-strip">
-      ${state.turns.map((t,i)=>`<div class="ticket">✳<span class="who">tour ${i+1}</span></div>`).join('')}
+      ${state.turns.map((t,i)=>`<div class="ticket">✳<span class="who">${tx(T.tour.etiquetteTour, {n: i+1})}</span></div>`).join('')}
     </div>
 
-    <p class="hint" style="margin-top:20px;">Révélation automatique après ${state.maxTurns} mots — on en est à ${state.turns.length}.</p>
-    ${canReveal ? `<div class="divider"></div><button class="ghost" id="revealBtn" style="width:100%;">On s'arrête là, révélation !</button>` : ''}
+    <p class="hint" style="margin-top:20px;">${tx(T.tour.progression, {total: state.maxTurns, faits: state.turns.length})}</p>
+    ${canReveal ? `<div class="divider"></div><button class="ghost" id="revealBtn" style="width:100%;">${T.tour.boutonArreter}</button>` : ''}
     `;
   }
 
@@ -1087,12 +1459,12 @@ function roomScreen(state){
     const activePlayer = state.players.find(p=>p.id===activePlayerId);
     const prevTurn = state.turns[state.turns.length-1];
     return `
-    <div class="eyebrow">Salon ${state.code} · dernier passage</div>
-    <h2 style="font-size:22px;">${state.solo ? `À ${activePlayer.name} de clore la phrase` : (isMyTurn ? "À toi de clore la phrase" : `${activePlayer.name} clôt la phrase`)}</h2>
-    <span class="badge yourturn" style="margin-top:8px;display:inline-block;">clôture</span>
+    <div class="eyebrow">${tx(T.clotureSolo.surTitre, {code: state.code})}</div>
+    <h2 style="font-size:22px;">${state.solo ? tx(T.clotureSolo.titreLocal, {nom: activePlayer.name}) : (isMyTurn ? T.clotureSolo.titreMoi : tx(T.clotureSolo.titreAutre, {nom: activePlayer.name}))}</h2>
+    <span class="badge yourturn" style="margin-top:8px;display:inline-block;">${T.clotureSolo.badge}</span>
     <span class="badge" id="turnTimerChip" style="margin-top:8px;margin-left:8px;display:none;">⏱ –</span>
-    <p class="hint" style="margin-top:8px;">Tous les mots sont posés. Reste à décoder le dernier, et on découvre le résultat.</p>
-    ${isMyTurn ? (readyForKey === turnKeyOf(state) ? closingUI(prevTurn) : readyUI(state, false, true)) : `<div class="card"><p class="hint">${activePlayer.name} décode le dernier mot… La révélation arrive juste après.</p></div>`}
+    <p class="hint" style="margin-top:8px;">${T.clotureSolo.intro}</p>
+    ${isMyTurn ? (readyForKey === turnKeyOf(state) ? closingUI(prevTurn) : readyUI(state, false, true)) : `<div class="card"><p class="hint">${tx(T.clotureSolo.attenteAutre, {nom: activePlayer.name})}</p></div>`}
     `;
   }
 
@@ -1102,45 +1474,43 @@ function roomScreen(state){
 }
 
 function chainsScreen(state){
-  const {P, r, mi, closing, c} = currentChainCtx(state);
+  const {P, N, r, mi, closing, c} = currentChainCtx(state);
   const chain = state.chains[c];
   const owner = state.players.find(p=>p.id===chain.ownerId);
   const played = closing ? !!chain.finalPerception : (chain.turns.length >= r + 1);
   const doneCount = closing
     ? state.chains.filter(ch=>ch.finalPerception).length
     : state.chains.filter(ch=>ch.turns.length >= r + 1).length;
-  const prevTurn = closing ? chain.turns[P-1] : (r > 0 ? chain.turns[r-1] : null);
-  const title = played ? "C'est envoyé !"
-    : (r === 0 ? "Lance ton amorce"
-    : (closing ? "Décode la fin de ta chaîne" : "À toi de jouer"));
+  const prevTurn = closing ? chain.turns[chain.turns.length-1] : (r > 0 ? chain.turns[r-1] : null);
+  const title = played ? T.manche.titreEnvoye
+    : (r === 0 ? T.manche.titreAmorce
+    : (closing ? T.manche.titreCloture : T.manche.titreNormal));
+  const ownerName = escapeHtml(owner ? owner.name : '?');
   return `
-  <div class="eyebrow">Salon ${state.code} · manche ${Math.min(r+1, P)} / ${P}${closing ? ' · clôture' : ''}</div>
+  <div class="eyebrow">${closing ? tx(T.manche.surTitreCloture, {code: state.code}) : tx(T.manche.surTitreMot, {code: state.code, n: r+1, total: N})}</div>
   <h2 style="font-size:22px;">${title}</h2>
-  <span class="badge yourturn" style="margin-top:8px;display:inline-block;">${closing ? 'clôture' : 'tous en même temps'}</span>
+  <span class="badge yourturn" style="margin-top:8px;display:inline-block;">${closing ? T.manche.badgeCloture : T.manche.badgeSimultane}</span>
   <span class="badge" id="turnTimerChip" style="margin-top:8px;margin-left:8px;display:none;">⏱ –</span>
-  ${(!played && r > 0 && !closing) ? `<p class="hint" style="margin-top:8px;">Tu joues sur la chaîne lancée par ${escapeHtml(owner ? owner.name : '?')}.</p>` : ''}
-  ${closing && !played ? `<p class="hint" style="margin-top:8px;">C'est TA chaîne qui revient — découvre ce que ton amorce est devenue.</p>` : ''}
+  ${(!played && r > 0 && !closing) ? `<p class="hint" style="margin-top:8px;">${tx(T.manche.chaineDe, {nom: ownerName})}</p>` : ''}
+  ${closing && !played ? `<p class="hint" style="margin-top:8px;">${tx(T.manche.clotureDe, {nom: ownerName})}</p>` : ''}
   ${played
-    ? `<div class="card"><p class="hint">Ton morceau est parti. On attend les autres… ${doneCount}/${P} ont joué cette manche.</p></div>`
+    ? `<div class="card"><p class="hint">${tx(T.manche.enAttente, {faits: doneCount, total: P})}</p></div>`
     : (readyForKey === turnKeyOf(state)
         ? (r === 0 ? myTurnUI(true, null) : (closing ? closingUI(prevTurn) : myTurnUI(false, prevTurn)))
         : readyUI(state, r === 0, closing))}
-  <p class="hint" style="margin-top:20px;">La manche avance quand tout le monde a joué (${doneCount}/${P}).</p>
+  <p class="hint" style="margin-top:20px;">${tx(T.manche.progression, {faits: doneCount, total: P})}</p>
   `;
 }
 
 function readyUI(state, isSeed, isClosing){
-  const steps = isSeed
-    ? "tu enregistres le tout premier mot (bien articulé !) et tu l'envoies"
-    : (isClosing
-      ? "tu écoutes le dernier mot à l'envers, tu l'imites, tu écoutes ta version remise à l'endroit, et tu dis ce que tu as compris"
-      : "tu écoutes le son reçu, tu l'imites, tu écoutes ta version remise à l'endroit, tu dis ce que tu as compris, puis tu ajoutes ton mot");
+  const steps = isSeed ? T.pret.etapesAmorce
+    : (isClosing ? T.pret.etapesCloture : T.pret.etapesNormal);
   return `
   <div class="card">
-    <div class="step-title">Quand tu veux !</div>
-    <p class="hint" style="margin-top:8px;">Au programme : ${steps}.</p>
-    <p class="hint">Tu auras ${state.recSeconds || 45} secondes après le compte à rebours. Là tout de suite, le chrono n'a pas commencé — souffle un coup.</p>
-    <button class="primary" id="readyBtn" style="margin-top:12px;">Je suis prêt !</button>
+    <div class="step-title">${T.pret.titre}</div>
+    <p class="hint" style="margin-top:8px;">${tx(T.pret.auProgramme, {etapes: steps})}</p>
+    <p class="hint">${tx(T.pret.chrono, {secondes: state.recSeconds || 45})}</p>
+    <button class="primary" id="readyBtn" style="margin-top:12px;">${T.pret.bouton}</button>
   </div>`;
 }
 
@@ -1150,35 +1520,35 @@ function closingUI(prevTurn){
     <div class="step" id="step1">
       <div class="step-num">1</div>
       <div class="step-body">
-        <div class="step-title">Écoute le dernier mot (à l'envers)</div>
-        ${playerHTML(prevTurn.reversedAudio)}
+        <div class="step-title">${T.etapes.ecouteClotureTitre}</div>
+        ${playerHTML(prevTurn.audio, true)}
       </div>
     </div>
     <div class="step" id="step2">
       <div class="step-num">2</div>
       <div class="step-body">
-        <div class="step-title">Essaie de le reproduire à voix haute</div>
-        <button id="attemptRecBtn">● Enregistrer ma tentative</button>
+        <div class="step-title">${T.etapes.imiteClotureTitre}</div>
+        <button id="attemptRecBtn">${T.enregistrement.boutonTentative}</button>
         <div id="attemptRecStatus" class="hint"></div>
       </div>
     </div>
     <div class="step locked" id="step3">
       <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">Écoute ta tentative remise à l'endroit</div>
+        <div class="step-title">${T.etapes.reecouteTitre}</div>
         <div id="attemptRevealAudio" style="display:none;"></div>
       </div>
     </div>
     <div class="step locked" id="step4">
       <div class="step-num">4</div>
       <div class="step-body">
-        <div class="step-title">Dis proprement ce que tu as compris</div>
-        <div class="step-desc">La toute dernière brique de la phrase du groupe.</div>
-        <button id="perceptionRecBtn">● Enregistrer ce que j'ai compris</button>
+        <div class="step-title">${T.etapes.comprisClotureTitre}</div>
+        <div class="step-desc">${T.etapes.comprisClotureTexte}</div>
+        <button id="perceptionRecBtn">${T.enregistrement.boutonCompris}</button>
         <div id="perceptionRecStatus" class="hint"></div>
       </div>
     </div>
-    <button class="primary" id="closingSubmitBtn" style="margin-top:14px;" disabled>Révéler la phrase</button>
+    <button class="primary" id="closingSubmitBtn" style="margin-top:14px;" disabled>${T.enregistrement.boutonReveler}</button>
   </div>`;
 }
 
@@ -1189,14 +1559,14 @@ function myTurnUI(isSeed, prevTurn){
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-title">Donne le premier mot</div>
-          <div class="step-desc">Balance une expression, un mot doux, une insulte... on s'en fiche tant que c'est bien articulé. Il partira à l'envers chez le joueur suivant — il ne l'entendra jamais à l'endroit.</div>
-          <button id="seedRecBtn">● Enregistrer</button>
+          <div class="step-title">${T.etapes.amorceTitre}</div>
+          <div class="step-desc">${T.etapes.amorceTexte}</div>
+          <button id="seedRecBtn">${T.enregistrement.boutonAmorce}</button>
           <div id="seedRecStatus" class="hint"></div>
           <div id="seedPreview" style="display:none;"></div>
         </div>
       </div>
-      <button class="primary" id="seedSubmitBtn" style="margin-top:14px;" disabled>Envoyer au joueur suivant</button>
+      <button class="primary" id="seedSubmitBtn" style="margin-top:14px;" disabled>${T.enregistrement.boutonEnvoyer}</button>
     </div>`;
   }
   return `
@@ -1204,139 +1574,119 @@ function myTurnUI(isSeed, prevTurn){
     <div class="step" id="step1">
       <div class="step-num">1</div>
       <div class="step-body">
-        <div class="step-title">Écoute ce qu'on t'a envoyé</div>
-        <div class="step-desc">C'est le mot du joueur d'avant, joué à l'envers. Aucune idée de ce que c'est ? Normal.</div>
-        ${playerHTML(prevTurn.reversedAudio)}
+        <div class="step-title">${T.etapes.ecouteTitre}</div>
+        <div class="step-desc">${T.etapes.ecouteTexte}</div>
+        ${playerHTML(prevTurn.audio, true)}
       </div>
     </div>
     <div class="step" id="step2">
       <div class="step-num">2</div>
       <div class="step-body">
-        <div class="step-title">Imite-le à voix haute</div>
-        <div class="step-desc">Reproduis ce charabia du mieux que tu peux.</div>
-        <button id="attemptRecBtn">● Enregistrer ma tentative</button>
+        <div class="step-title">${T.etapes.imiteTitre}</div>
+        <div class="step-desc">${T.etapes.imiteTexte}</div>
+        <button id="attemptRecBtn">${T.enregistrement.boutonTentative}</button>
         <div id="attemptRecStatus" class="hint"></div>
       </div>
     </div>
     <div class="step locked" id="step3">
       <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">Écoute ta tentative remise à l'endroit</div>
-        <div class="step-desc">Ton seul vrai indice sur ce qui a été dit au départ. Tends l'oreille.</div>
+        <div class="step-title">${T.etapes.reecouteTitre}</div>
+        <div class="step-desc">${T.etapes.reecouteTexte}</div>
         <div id="attemptRevealAudio" style="display:none;"></div>
       </div>
     </div>
     <div class="step locked" id="step4">
       <div class="step-num">4</div>
       <div class="step-body">
-        <div class="step-title">Dis ce que tu as compris</div>
-        <div class="step-desc">Prononce clairement ce que tu crois avoir entendu, c'est ce qui finira dans la phrase du groupe.</div>
-        <button id="perceptionRecBtn">● Enregistrer ce que j'ai compris</button>
+        <div class="step-title">${T.etapes.comprisTitre}</div>
+        <div class="step-desc">${T.etapes.comprisTexte}</div>
+        <button id="perceptionRecBtn">${T.enregistrement.boutonCompris}</button>
         <div id="perceptionRecStatus" class="hint"></div>
       </div>
     </div>
     <div class="step locked" id="step5">
       <div class="step-num">5</div>
       <div class="step-body">
-        <div class="step-title">Ajoute ton contribution à la chaîne</div>
-        <div class="step-desc">À toi de jouer : tes douces paroles partiront à l'envers chez le joueur suivant.</div>
-        <button id="newWordRecBtn">● Enregistrer mon mot</button>
+        <div class="step-title">${T.etapes.ajouteTitre}</div>
+        <div class="step-desc">${T.etapes.ajouteTexte}</div>
+        <button id="newWordRecBtn">${T.enregistrement.boutonMot}</button>
         <div id="newWordRecStatus" class="hint"></div>
       </div>
     </div>
-    <button class="primary" id="turnSubmitBtn" style="margin-top:14px;" disabled>Envoyer au joueur suivant</button>
+    <button class="primary" id="turnSubmitBtn" style="margin-top:14px;" disabled>${T.enregistrement.boutonEnvoyer}</button>
   </div>`;
 }
 
 function revealScreen(state){
   if(state.chains) return chainsRevealScreen(state);
+  const realNames = state.turns.map(t=>t.playerName);
+  const percNames = state.turns.filter(t=>t.perceptionAudio).map(t=>t.playerName)
+    .concat(state.finalPerception ? [state.finalPerception.playerName] : []);
   return `
-  <div class="eyebrow">Révélation</div>
-  <h2 style="font-size:26px;">Le grand écart</h2>
-  <div class="card">
-    <div class="step">
-      <div class="step-num">A</div>
-      <div class="step-body">
-        <div class="step-title">La vraie phrase</div>
-        <div class="step-desc">Tous les mots vraiment prononcés, mis bout à bout. Personne ne l'a encore jamais entendue en entier.</div>
-        <button class="primary" id="playRealBtn">▶ Écouter la vraie phrase</button>
-        <div id="realStatus" class="hint"></div>
-        <div id="realAudio" style="display:none;"></div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">B</div>
-      <div class="step-body">
-        <div class="step-title">La phrase perçue</div>
-        <div class="step-desc">Ce que chacun a cru comprendre, mis bout à bout.</div>
-        <button class="primary" id="playPerceivedBtn">▶ Écouter la phrase perçue</button>
-        <div id="perceivedStatus" class="hint"></div>
-        <div id="perceivedAudio" style="display:none;"></div>
-      </div>
-    </div>
+  <div class="eyebrow">${T.reveal.surTitre}</div>
+  <h2 style="font-size:28px;">${T.reveal.titre}</h2>
+  <p class="subtitle">${T.reveal.introSolo}</p>
+  <div class="card reveal-card">
+    ${phraseBlock('solo-real', T.reveal.vraieTitre, T.reveal.vraieTexte, realNames)}
+    ${phraseBlock('solo-perceived', T.reveal.percueTitre, T.reveal.percueTexte, percNames)}
   </div>
-  <div class="divider"></div>
-  <div class="card">
-    <div class="chain-label">Le détail, tour par tour</div>
-    ${state.turns.map((t,i)=>`
-      <div style="margin-bottom:14px;">
-        <div class="hint">Tour ${i+1} — mot de ${escapeHtml(t.playerName)}</div>
-        ${playerHTML(t.audio)}
-        ${t.perceptionAudio ? `<div class="hint" style="margin-top:6px;">Ce que ${escapeHtml(t.playerName)} a compris du mot précédent</div>
-        ${playerHTML(t.perceptionAudio)}` : ''}
-        ${t.attemptRestoredAudio ? `<div class="hint" style="margin-top:6px;">Son imitation brute, remise à l'endroit</div>
-        ${playerHTML(t.attemptRestoredAudio)}` : ''}
-      </div>
-    `).join('')}
-    ${state.finalPerception ? `
-      <div style="margin-bottom:14px;">
-        <div class="hint">Clôture — ce que ${escapeHtml(state.finalPerception.playerName)} a compris du dernier mot</div>
-        ${playerHTML(state.finalPerception.perceptionAudio)}
-        <div class="hint" style="margin-top:6px;">Son imitation brute, remise à l'endroit</div>
-        ${playerHTML(state.finalPerception.attemptRestoredAudio)}
-      </div>` : ''}
-  </div>
-  ${(state.solo || state.order[0] === myId) ? `<button class="primary" id="replayBtn" style="margin-top:18px;">Rejouer avec les mêmes joueurs</button>` : `<p class="hint center" style="margin-top:18px;">L'hôte peut relancer une partie dans ce même salon.</p>`}
-  <button class="ghost" id="newGameBtn" style="margin-top:10px;width:100%;">Retour à l'accueil</button>
+  <button class="primary" id="replayBtn" style="margin-top:20px;">${T.reveal.boutonRejouer}</button>
+  <button class="ghost" id="newGameBtn" style="margin-top:10px;width:100%;">${T.reveal.boutonAccueil}</button>
   `;
 }
 
-function chainsRevealScreen(state){
-  const footer = `
-  ${(state.order[0] === myId) ? `<button class="primary" id="replayBtn" style="margin-top:18px;">Rejouer avec les mêmes joueurs</button>` : `<p class="hint center" style="margin-top:18px;">L'hôte peut relancer une partie dans ce même salon.</p>`}
-  <button class="ghost" id="newGameBtn" style="margin-top:10px;width:100%;">Retour à l'accueil</button>`;
+function phraseBlock(id, label, desc, names){
   return `
-  <div class="eyebrow">Révélation</div>
-  <h2 style="font-size:26px;">${state.chains.length} chaînes, ${state.chains.length} grands écarts</h2>
+  <div class="phrase" id="ph-${id}">
+    <div class="phrase-head">
+      <button class="phrase-btn" data-ph="${id}">▶</button>
+      <div class="phrase-meta">
+        <div class="phrase-label">${label}</div>
+        <div class="phrase-desc">${desc}</div>
+      </div>
+    </div>
+    <div class="chips">${names.map((n,i)=>`<span class="chip" data-i="${i}">${escapeHtml(n)}</span>`).join('')}</div>
+    <div class="phrase-bar"><div class="phrase-fill"></div></div>
+  </div>`;
+}
+
+function chainsRevealScreen(state){
+  return `
+  <div class="eyebrow">${T.reveal.surTitre}</div>
+  <h2 style="font-size:28px;">${T.reveal.titre}</h2>
+  <p class="subtitle">${tx(T.reveal.introChaines, {n: state.chains.length})}</p>
   ${state.chains.map((ch, ci)=>{
     const owner = state.players.find(p=>p.id===ch.ownerId);
+    const realNames = ch.turns.map(t=>t.playerName);
+    const percNames = ch.turns.filter(t=>t.perceptionAudio).map(t=>t.playerName)
+      .concat(ch.finalPerception ? [ch.finalPerception.playerName] : []);
     return `
-    <div class="card">
-      <div class="chain-label" style="margin-top:0;">La chaîne de ${escapeHtml(owner ? owner.name : '?')}</div>
-      <button class="primary chainPlay" data-kind="real" data-ci="${ci}">▶ La vraie phrase</button>
-      <div class="hint" id="chainStatus-real-${ci}"></div>
-      <div id="chainAudio-real-${ci}" style="display:none;"></div>
-      <button class="primary chainPlay" data-kind="perceived" data-ci="${ci}" style="margin-top:10px;">▶ La phrase perçue</button>
-      <div class="hint" id="chainStatus-perceived-${ci}"></div>
-      <div id="chainAudio-perceived-${ci}" style="display:none;"></div>
-      <div class="divider"></div>
-      ${ch.turns.map((t,i)=>`
-        <div style="margin-bottom:14px;">
-          <div class="hint">Mot ${i+1} — ${escapeHtml(t.playerName)}</div>
-          ${playerHTML(t.audio)}
-          ${t.perceptionAudio ? `<div class="hint" style="margin-top:6px;">Ce que ${escapeHtml(t.playerName)} avait compris du mot précédent</div>
-          ${playerHTML(t.perceptionAudio)}` : ''}
-        </div>
-      `).join('')}
-      ${ch.finalPerception ? `
-        <div style="margin-bottom:4px;">
-          <div class="hint">Clôture — ce que ${escapeHtml(ch.finalPerception.playerName)} a compris du dernier mot</div>
-          ${playerHTML(ch.finalPerception.perceptionAudio)}
-        </div>` : ''}
+    <div class="card reveal-card">
+      <div class="chain-title">${tx(T.reveal.chaineDe, {nom: escapeHtml(owner ? owner.name : '?')})}</div>
+      ${phraseBlock(ci+'-real', T.reveal.vraieTitre, T.reveal.vraieTexte, realNames)}
+      ${phraseBlock(ci+'-perceived', T.reveal.percueTitre, T.reveal.percueTexte, percNames)}
     </div>`;
   }).join('')}
-  ${footer}
+  ${(state.order[0] === myId) ? `<button class="primary" id="replayBtn" style="margin-top:20px;">${T.reveal.boutonRejouer}</button>` : `<p class="hint center" style="margin-top:20px;">${T.reveal.hoteRelance}</p>`}
+  <button class="ghost" id="newGameBtn" style="margin-top:10px;width:100%;">${T.reveal.boutonAccueil}</button>
   `;
+}
+
+// Sources for a phrase id like "2-real" / "solo-perceived".
+function phraseSources(state, id){
+  const cut = id.lastIndexOf('-');
+  const key = id.slice(0, cut), kind = id.slice(cut+1);
+  let turns, finalP;
+  if(state.chains){
+    const ch = state.chains[+key];
+    turns = ch.turns; finalP = ch.finalPerception;
+  } else {
+    turns = state.turns; finalP = state.finalPerception;
+  }
+  if(kind === 'real') return turns.map(t=>t.audio);
+  return turns.filter(t=>t.perceptionAudio).map(t=>t.perceptionAudio)
+    .concat(finalP ? [finalP.perceptionAudio] : []);
 }
 
 function escapeHtml(s){
@@ -1357,23 +1707,38 @@ function setRecLock(activeId){
 }
 
 function wireEvents(){
+  const sfxToggle = document.getElementById('sfxToggle');
+  if(sfxToggle) sfxToggle.onclick = ()=>{
+    setSfx(!sfxOn);
+    sfxToggle.textContent = sfxOn ? T.accueil.sonsActives : T.accueil.sonsCoupes;
+    if(sfxOn) SFX.recOff();
+  };
+
   const createBtn = document.getElementById('createBtn');
   if(createBtn){
     createBtn.onclick = async ()=>{
       myName = document.getElementById('nameInput').value.trim();
-      if(!myName){ showLandingError("Entre ton prénom d'abord."); return; }
-      createBtn.disabled=true; createBtn.textContent='Création…';
+      if(!myName){ showLandingError(T.erreurs.prenomManquant); return; }
+      createBtn.disabled=true; createBtn.textContent=T.enregistrement.envoiEnCours;
       await createRoom();
     };
   }
+  renderLocalNames();
+
+  const addPlayerBtn = document.getElementById('addPlayerBtn');
+  if(addPlayerBtn) addPlayerBtn.onclick = ()=>{
+    if(localNames.length >= 10) return;
+    localNames.push('');
+    renderLocalNames();
+  };
+
   const localBtn = document.getElementById('localBtn');
   if(localBtn) localBtn.onclick = async ()=>{
-    myName = document.getElementById('nameInput').value.trim() || 'Joueur 1';
-    let n = parseInt(document.getElementById('localPlayersInput').value, 10);
-    if(isNaN(n)) n = 3;
-    n = Math.max(2, Math.min(8, n));
+    const names = localNames.map((n, i)=> n.trim() || ('Joueur ' + (i+1)));
+    if(names.length < 2){ showLandingError(T.erreurs.deuxJoueursMini); return; }
+    myName = names[0];
     localBtn.disabled=true;
-    await createLocalRoom(n);
+    await createLocalRoom(names);
   };
   const joinToggle = document.getElementById('joinToggle');
   if(joinToggle) joinToggle.onclick = ()=>{
@@ -1384,9 +1749,9 @@ function wireEvents(){
     joinBtn.onclick = async ()=>{
       myName = document.getElementById('nameInput').value.trim();
       const code = document.getElementById('codeInput').value.trim();
-      if(!myName){ showLandingError("Entre ton prénom d'abord."); return; }
-      if(!code){ showLandingError('Entre un code de salon.'); return; }
-      joinBtn.disabled=true; joinBtn.textContent='Connexion…';
+      if(!myName){ showLandingError(T.erreurs.prenomManquant); return; }
+      if(!code){ showLandingError(T.erreurs.codeManquant); return; }
+      joinBtn.disabled=true; joinBtn.textContent=T.enregistrement.envoiEnCours;
       await joinRoom(code);
     };
   }
@@ -1397,9 +1762,9 @@ function wireEvents(){
     const status = document.getElementById('copyStatus');
     try{
       await navigator.clipboard.writeText(link);
-      if(status) status.textContent = 'Lien copié !';
+      if(status) status.textContent = T.salon.lienCopie;
     }catch(e){
-      window.prompt('Copie ce lien :', link);
+      window.prompt(T.salon.copieManuelle, link);
     }
     setTimeout(()=>{ const s=document.getElementById('copyStatus'); if(s) s.textContent=''; }, 2500);
   };
@@ -1420,7 +1785,7 @@ function wireEvents(){
     if(!state.solo){
       // Online = Gartic-style: one chain per player, rotating each round.
       state.chains = state.order.map(id=>({ownerId:id, turns:[]}));
-      state.maxTurns = state.order.length;
+      state.maxTurns = Math.max(state.order.length, state.maxTurns || 0);
     }
     state.phase='playing';
     await writeRoom(currentRoom, state);
@@ -1437,33 +1802,6 @@ function wireEvents(){
     poll();
   };
 
-  async function stitchAndPlay(btnId, statusId, audioId, urls, emptyMsg){
-    const btn = typeof btnId === 'string' ? document.getElementById(btnId) : btnId;
-    const status = document.getElementById(statusId);
-    const audioEl = document.getElementById(audioId);
-    if(!urls.length){ status.textContent = emptyMsg; return; }
-    btn.disabled = true; status.textContent = 'Assemblage…';
-    try{
-      const stitched = await concatDataUrls(urls);
-      audioEl.innerHTML = playerHTML(stitched);
-      audioEl.style.display='block';
-      status.textContent = '';
-      const pb = audioEl.querySelector('.pbtn'); if(pb) pb.click();
-    }catch(e){ status.textContent = 'Erreur : ' + (e.message||e); }
-    btn.disabled = false;
-  }
-  const playRealBtn = document.getElementById('playRealBtn');
-  if(playRealBtn) playRealBtn.onclick = ()=>{
-    stitchAndPlay('playRealBtn','realStatus','realAudio',
-      localState.turns.map(t=>t.audio), 'Aucun enregistrement.');
-  };
-  const playPerceivedBtn = document.getElementById('playPerceivedBtn');
-  if(playPerceivedBtn) playPerceivedBtn.onclick = ()=>{
-    stitchAndPlay('playPerceivedBtn','perceivedStatus','perceivedAudio',
-      localState.turns.filter(t=>t.perceptionAudio).map(t=>t.perceptionAudio)
-        .concat(localState.finalPerception ? [localState.finalPerception.perceptionAudio] : []),
-      'Rien à écouter ici — il faut au moins 2 tours.');
-  };
 
   const replayBtn = document.getElementById('replayBtn');
   if(replayBtn) replayBtn.onclick = async ()=>{
@@ -1475,29 +1813,21 @@ function wireEvents(){
     delete state.chains;
     state.phase = 'lobby';
     readyForKey = null;
+    stopPhrase(); phraseCache.clear();
     clearTurnTimer();
     await writeRoom(currentRoom, state);
     lastRenderedJson = null;
     poll();
   };
 
-  document.querySelectorAll('.chainPlay').forEach(b=>{
-    b.onclick = ()=>{
-      const ci = +b.dataset.ci, kind = b.dataset.kind;
-      const ch = localState.chains[ci];
-      const urls = kind === 'real'
-        ? ch.turns.map(t=>t.audio)
-        : ch.turns.filter(t=>t.perceptionAudio).map(t=>t.perceptionAudio)
-            .concat(ch.finalPerception ? [ch.finalPerception.perceptionAudio] : []);
-      stitchAndPlay(b, 'chainStatus-' + kind + '-' + ci, 'chainAudio-' + kind + '-' + ci, urls, 'Rien à écouter ici.');
-    };
-  });
+  document.querySelectorAll('.phrase-btn').forEach(b=>{ b.onclick = ()=>playPhrase(b); });
 
   const newGameBtn = document.getElementById('newGameBtn');
   if(newGameBtn) newGameBtn.onclick = ()=>{
     currentRoom=null; if(pollTimer) clearInterval(pollTimer);
     teardownNet();
     clearTurnTimer();
+    stopPhrase(); phraseCache.clear();
     readyForKey = null;
     lastRenderedJson = null;
     render(landingScreen()); wireEvents();
@@ -1511,14 +1841,16 @@ function wireEvents(){
       return;
     }
     if(isRecording) return; // another recording is live — ignore
-    seedRecBtn.classList.add('rec-active'); seedRecBtn.textContent='■ Arrêter';
-    document.getElementById('seedRecStatus').textContent = 'Enregistrement…';
+    SFX.recOn();
+    seedRecBtn.classList.add('rec-active'); seedRecBtn.textContent=T.enregistrement.boutonArreter;
+    document.getElementById('seedRecStatus').textContent = T.enregistrement.enCours;
     isRecording = true;
     setRecLock('seedRecBtn');
     try{
       seedBlob = await recordWithTimer(streamHandle, 'seedRecStatus');
-      seedRecBtn.classList.remove('rec-active'); seedRecBtn.textContent='● Ré-enregistrer';
-      document.getElementById('seedRecStatus').textContent = 'Enregistré ✓';
+      SFX.recOff();
+      seedRecBtn.classList.remove('rec-active'); seedRecBtn.textContent=T.enregistrement.boutonRefaire;
+      document.getElementById('seedRecStatus').textContent = T.enregistrement.termine;
       const prev = document.getElementById('seedPreview');
       prev.innerHTML = playerHTML(URL.createObjectURL(seedBlob)); prev.style.display='block';
       isRecording = false;
@@ -1527,8 +1859,8 @@ function wireEvents(){
     }catch(e){
       isRecording = false;
       setRecLock(null);
-      document.getElementById('seedRecStatus').textContent = 'Erreur micro : ' + (e.message||e);
-      seedRecBtn.classList.remove('rec-active'); seedRecBtn.textContent='● Enregistrer';
+      document.getElementById('seedRecStatus').textContent = T.enregistrement.erreurMicro + (e.message||e);
+      seedRecBtn.classList.remove('rec-active'); seedRecBtn.textContent=T.enregistrement.boutonAmorce;
     }
   };
   function checkSeedReady(){
@@ -1546,16 +1878,18 @@ function wireEvents(){
       return;
     }
     if(isRecording) return; // another recording is live — ignore
-    attemptRecBtn.classList.add('rec-active'); attemptRecBtn.textContent='■ Arrêter';
-    document.getElementById('attemptRecStatus').textContent = 'Enregistrement de ta tentative…';
+    SFX.recOn();
+    attemptRecBtn.classList.add('rec-active'); attemptRecBtn.textContent=T.enregistrement.boutonArreter;
+    document.getElementById('attemptRecStatus').textContent = T.enregistrement.enCoursTentative;
     isRecording = true;
     setRecLock('attemptRecBtn');
     try{
       attemptBlob = await recordWithTimer(streamHandle, 'attemptRecStatus');
-      attemptRecBtn.classList.remove('rec-active'); attemptRecBtn.textContent='● Ré-enregistrer';
-      document.getElementById('attemptRecStatus').textContent = 'Une seconde, je le retourne…';
+      SFX.recOff();
+      attemptRecBtn.classList.remove('rec-active'); attemptRecBtn.textContent=T.enregistrement.boutonRefaire;
+      document.getElementById('attemptRecStatus').textContent = T.enregistrement.inversionEnCours;
       attemptReversedB64 = await reverseBlobToWavB64(attemptBlob);
-      document.getElementById('attemptRecStatus').textContent = 'Tentative enregistrée ✓';
+      document.getElementById('attemptRecStatus').textContent = T.enregistrement.tentativeOk;
       document.getElementById('step3').classList.remove('locked');
       const revealAudio = document.getElementById('attemptRevealAudio');
       revealAudio.innerHTML = playerHTML(attemptReversedB64); revealAudio.style.display='block';
@@ -1569,8 +1903,8 @@ function wireEvents(){
     }catch(e){
       isRecording = false;
       setRecLock(null);
-      document.getElementById('attemptRecStatus').textContent = 'Erreur micro : ' + (e.message||e);
-      attemptRecBtn.classList.remove('rec-active'); attemptRecBtn.textContent='● Enregistrer ma tentative';
+      document.getElementById('attemptRecStatus').textContent = T.enregistrement.erreurMicro + (e.message||e);
+      attemptRecBtn.classList.remove('rec-active'); attemptRecBtn.textContent=T.enregistrement.boutonTentative;
     }
   };
 
@@ -1582,14 +1916,16 @@ function wireEvents(){
       return;
     }
     if(isRecording) return; // another recording is live — ignore
-    perceptionRecBtn.classList.add('rec-active'); perceptionRecBtn.textContent='■ Arrêter';
-    document.getElementById('perceptionRecStatus').textContent = 'Enregistrement…';
+    SFX.recOn();
+    perceptionRecBtn.classList.add('rec-active'); perceptionRecBtn.textContent=T.enregistrement.boutonArreter;
+    document.getElementById('perceptionRecStatus').textContent = T.enregistrement.enCours;
     isRecording = true;
     setRecLock('perceptionRecBtn');
     try{
       perceptionBlob = await recordWithTimer(streamHandle, 'perceptionRecStatus');
-      perceptionRecBtn.classList.remove('rec-active'); perceptionRecBtn.textContent='● Ré-enregistrer';
-      document.getElementById('perceptionRecStatus').textContent = 'Enregistré ✓';
+      SFX.recOff();
+      perceptionRecBtn.classList.remove('rec-active'); perceptionRecBtn.textContent=T.enregistrement.boutonRefaire;
+      document.getElementById('perceptionRecStatus').textContent = T.enregistrement.termine;
       isRecording = false;
       setRecLock(null);
       checkTurnReady();
@@ -1597,8 +1933,8 @@ function wireEvents(){
     }catch(e){
       isRecording = false;
       setRecLock(null);
-      document.getElementById('perceptionRecStatus').textContent = 'Erreur micro : ' + (e.message||e);
-      perceptionRecBtn.classList.remove('rec-active'); perceptionRecBtn.textContent='● Enregistrer ce que j\'ai compris';
+      document.getElementById('perceptionRecStatus').textContent = T.enregistrement.erreurMicro + (e.message||e);
+      perceptionRecBtn.classList.remove('rec-active'); perceptionRecBtn.textContent=T.enregistrement.boutonCompris;
     }
   };
 
@@ -1609,22 +1945,24 @@ function wireEvents(){
       return;
     }
     if(isRecording) return; // another recording is live — ignore
-    newWordRecBtn.classList.add('rec-active'); newWordRecBtn.textContent='■ Arrêter';
-    document.getElementById('newWordRecStatus').textContent = 'Enregistrement…';
+    SFX.recOn();
+    newWordRecBtn.classList.add('rec-active'); newWordRecBtn.textContent=T.enregistrement.boutonArreter;
+    document.getElementById('newWordRecStatus').textContent = T.enregistrement.enCours;
     isRecording = true;
     setRecLock('newWordRecBtn');
     try{
       newWordBlob = await recordWithTimer(streamHandle, 'newWordRecStatus');
-      newWordRecBtn.classList.remove('rec-active'); newWordRecBtn.textContent='● Ré-enregistrer';
-      document.getElementById('newWordRecStatus').textContent = 'Enregistré ✓';
+      SFX.recOff();
+      newWordRecBtn.classList.remove('rec-active'); newWordRecBtn.textContent=T.enregistrement.boutonRefaire;
+      document.getElementById('newWordRecStatus').textContent = T.enregistrement.termine;
       isRecording = false;
       setRecLock(null);
       checkTurnReady();
     }catch(e){
       isRecording = false;
       setRecLock(null);
-      document.getElementById('newWordRecStatus').textContent = 'Erreur micro : ' + (e.message||e);
-      newWordRecBtn.classList.remove('rec-active'); newWordRecBtn.textContent='● Enregistrer mon mot';
+      document.getElementById('newWordRecStatus').textContent = T.enregistrement.erreurMicro + (e.message||e);
+      newWordRecBtn.classList.remove('rec-active'); newWordRecBtn.textContent=T.enregistrement.boutonMot;
     }
   };
 
@@ -1653,6 +1991,50 @@ function myNameOf(state){
   return p ? p.name : myName;
 }
 
+/* ====================== REVEAL PLAYBACK ====================== */
+const phraseCache = new Map();
+let phraseAudio = null, phraseTimer = null, phraseActiveBtn = null;
+
+function stopPhrase(){
+  if(phraseTimer){ clearInterval(phraseTimer); phraseTimer = null; }
+  if(phraseAudio){ phraseAudio.pause(); phraseAudio = null; }
+  if(phraseActiveBtn){ phraseActiveBtn.textContent = '▶'; phraseActiveBtn = null; }
+  document.querySelectorAll('.chip.active').forEach(c=>c.classList.remove('active'));
+}
+
+// Plays a whole stitched phrase and lights up each contributor's chip as
+// their word plays — the reveal is meant to be watched, not just heard.
+async function playPhrase(btn){
+  const id = btn.dataset.ph;
+  const box = document.getElementById('ph-' + id);
+  if(phraseActiveBtn === btn && phraseAudio && !phraseAudio.paused){ stopPhrase(); return; }
+  stopPhrase();
+  if(sharedAudio){ sharedAudio.pause(); resetActivePlayer(); }
+  btn.textContent = '…';
+  let data = phraseCache.get(id);
+  if(!data){
+    const urls = phraseSources(localState, id);
+    if(!urls.length){ btn.textContent = '▶'; return; }
+    try{ data = await concatDataUrls(urls); phraseCache.set(id, data); }
+    catch(e){ btn.textContent = '▶'; return; }
+  }
+  phraseAudio = new Audio(data.url);
+  phraseActiveBtn = btn;
+  btn.textContent = '⏸';
+  const chips = box ? box.querySelectorAll('.chip') : [];
+  const fill = box ? box.querySelector('.phrase-fill') : null;
+  phraseTimer = setInterval(()=>{
+    if(!phraseAudio) return;
+    const t = phraseAudio.currentTime;
+    if(fill && phraseAudio.duration) fill.style.width = (t / phraseAudio.duration * 100) + '%';
+    data.segs.forEach((s, i)=>{
+      if(chips[i]) chips[i].classList.toggle('active', t >= s.start && t <= s.end);
+    });
+  }, 60);
+  phraseAudio.onended = ()=>{ if(fill) fill.style.width = '100%'; stopPhrase(); };
+  phraseAudio.play();
+}
+
 /* ====================== INIT ====================== */
 render(landingScreen());
 (function(){
@@ -1664,7 +2046,7 @@ render(landingScreen());
       box.style.display = 'block';
       codeInput.value = invited.toUpperCase();
       box.insertAdjacentHTML('afterbegin',
-        `<p class="hint" style="margin-top:0;color:var(--sun);">Tu es invité au salon ${invited.toUpperCase()} — entre ton prénom au-dessus et clique Rejoindre.</p>`);
+        `<p class="hint" style="margin-top:0;color:var(--sun);">${tx(T.accueil.invitation, {code: invited.toUpperCase()})}</p>`);
     }
   }
 })();
