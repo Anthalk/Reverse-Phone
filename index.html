@@ -313,16 +313,7 @@
 <div id="app" class="app"></div>
 
 <script>
-/* ============================================================================
-   TOUS LES TEXTES DU JEU
-   ----------------------------------------------------------------------------
-   Tu peux modifier librement tout ce qui est entre guillemets ci-dessous.
-   Deux règles seulement :
-     1) Ne touche pas aux noms à gauche des deux-points (accueil, titre, etc.)
-     2) Garde les {accolades} : elles sont remplacées automatiquement
-        ({nom} = prénom du joueur, {code} = code du salon, etc.)
-   Rien d'autre dans ce fichier n'a besoin d'être modifié pour changer un texte.
-   ========================================================================== */
+
 const TEXTES = {
 
   accueil: {
@@ -330,10 +321,10 @@ const TEXTES = {
     surTitre:           "Le jeu du téléphone… à l'envers",
     titre1:             "Reverse ",
     titre2:            "Phone",
-    intro:              "Un mot circule de joueur en joueur, toujours à l'envers. Tu l'écoutes, tu l'imites, tu découvres ce que ça donne remis à l'endroit… puis tu ajoutes le tien. À la fin, on compare ce qui a vraiment été dit avec ce que tout le monde a cru entendre. Spoiler : c'est jamais pareil.",
-    labelPrenom:        "Ton prénom",
+    intro:              "Un mot ou un morceau de phrase circule de joueur en joueur, toujours à l'envers. Tu l'écoutes, tu l'imites, tu découvres ce que ça donne remis à l'endroit… puis tu ajoutes le tien. À la fin, on compare ce qui a vraiment été dit avec ce que tout le monde a cru entendre. Bon chance.",
+    labelPrenom:        "Qui es-tu ?",
     placeholderPrenom:  "UnSuperSurnom",
-    labelNbMots:        "Nombre de mots",
+    labelNbMots:        "Nombre de morceaux",
     labelTemps:         "Temps par tour (s)",
     boutonCreer:        "Créer un salon",
     boutonRejoindre:    "Rejoindre",
@@ -348,7 +339,7 @@ const TEXTES = {
     boutonRejoindreSalon:"Rejoindre le salon",
     sonsActives:        "🔊 Sons",
     sonsCoupes:         "🔇 Sons",
-    invitation:         "Tu es invité au salon {code} — entre ton prénom au-dessus et clique Rejoindre.",
+    invitation:         "Tu es invité au salon {code} — décline ton identité juste au-dessus et clique sur Rejoindre.",
     microBloqueTitre:   "Micro inaccessible ici",
     microBloque1:       "Ton navigateur bloque le micro parce que la page n'est pas ouverte via une adresse sécurisée (https). C'est le cas quand on ouvre le fichier téléchargé directement, surtout sur téléphone.",
     microBloque2:       "Ouvre plutôt le jeu depuis son lien https (celui qu'on t'a partagé) — depuis un fichier téléchargé, le micro reste bloqué, surtout sur téléphone."
@@ -367,7 +358,7 @@ const TEXTES = {
     labelJoueurs:       "Joueurs ({n})",
     suffixeToi:         " (toi)",
     suffixeHote:        " — hôte",
-    labelMotsParPhrase: "Mots par phrase",
+    labelMotsParPhrase: "Morceaux par phrase",
     labelTemps:         "Temps par tour (s)",
     explicationChaines: "Chacun lance son amorce, puis les chaînes tournent — autant de phrases finales que de joueurs. Minimum {n} mots (un passage par joueur) ; au-delà, les chaînes font plusieurs tours de table.",
     boutonLancer:       "Lancer la partie",
@@ -377,7 +368,7 @@ const TEXTES = {
 
   pret: {
     titre:              "Quand tu veux !",
-    auProgramme:        "Au programme : {etapes}.",
+    auProgramme:        "Mais dis moi Jamy ? Qu'est-ce que je dois faire ? : {etapes}.",
     etapesAmorce:       "tu enregistres le tout premier mot (bien articulé !) et tu l'envoies",
     etapesCloture:      "tu écoutes le dernier mot d'une chaîne à l'envers, tu l'imites, tu écoutes ta version remise à l'endroit, et tu dis ce que tu as compris — c'est le mot qui la clôt",
     etapesNormal:       "tu écoutes le son reçu, tu l'imites, tu écoutes ta version remise à l'endroit, tu dis ce que tu as compris, puis tu ajoutes ton mot",
