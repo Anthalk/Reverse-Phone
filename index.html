@@ -331,8 +331,8 @@ const TEXTES = {
     titreLocal:         "Sur un seul appareil",
     introLocal:         "Même pièce, même canapé ? Faites tourner le téléphone, chacun s'isole puis joue son tour.",
     labelQuiJoue:       "Qui joue ?",
-    placeholderJoueur:  "Joueur {n}",
-    boutonAjouterJoueur:"+ Ajouter un joueur",
+    placeholderJoueur:  "Joueur(se) {n}",
+    boutonAjouterJoueur:"+ Ajouter un(e) joueur(se)",
     boutonLancerLocal:  "Lancer en local",
     labelCodeSalon:     "Code du salon",
     placeholderCode:    "Ex. FOXA",
@@ -368,18 +368,18 @@ const TEXTES = {
 
   pret: {
     titre:              "Quand tu veux !",
-    auProgramme:        "Mais dis moi Jamy ? Qu'est-ce que je dois faire ? : {etapes}.",
+    auProgramme:        "Mais dis moi Jamy ? Qu'est-ce que je dois faire ? {etapes}.",
     etapesAmorce:       "tu enregistres le tout premier mot (bien articulé !) et tu l'envoies",
     etapesCloture:      "tu écoutes le dernier mot d'une chaîne à l'envers, tu l'imites, tu écoutes ta version remise à l'endroit, et tu dis ce que tu as compris — c'est le mot qui la clôt",
     etapesNormal:       "tu écoutes le son reçu, tu l'imites, tu écoutes ta version remise à l'endroit, tu dis ce que tu as compris, puis tu ajoutes ton mot",
-    chrono:             "Tu auras {secondes} secondes après le compte à rebours. Là tout de suite, le chrono n'a pas commencé — souffle un coup.",
+    chrono:             "Tu auras {secondes} secondes après le compte à rebours. Là tout de suite, le chrono n'a pas commencé souffle un coup et lance toi champion",
     bouton:             "Je suis prêt !",
-    compteARebours:     ["3", "2", "1", "À toi !"]
+    compteARebours:     ["10", "7", "2", "À toi !"]
   },
 
   tour: {
     surTitre:           "Salon {code} · tour {n} / {total}",
-    titreLocal:         "📱 À {nom} de jouer",
+    titreLocal:         "À {nom} de jouer",
     titreMoi:           "C'est ton tour",
     titreAutre:         "Au tour de {nom}",
     badgeLocal:         "partie locale",
@@ -388,7 +388,7 @@ const TEXTES = {
     passeLAppareil:     "File l'appareil à {nom}. Les autres : on ne regarde pas !",
     attenteAutre:       "{nom} est en train d'écouter, imiter, deviner… Ton tour approche.",
     etiquetteTour:      "tour {n}",
-    progression:        "Révélation automatique après {total} mots — on en est à {faits}.",
+    progression:        "Révélation après {total} mots — on en est à {faits}.",
     boutonArreter:      "On s'arrête là, révélation !"
   },
 
@@ -418,13 +418,13 @@ const TEXTES = {
   },
 
   etapes: {
-    amorceTitre:        "Donne le premier mot",
+    amorceTitre:        "Donne le la",
     amorceTexte:        "Balance une expression, un mot doux, une insulte... on s'en fiche tant que c'est bien articulé. Il partira à l'envers chez le joueur suivant — il ne l'entendra jamais à l'endroit.",
     ecouteTitre:        "Écoute ce qu'on t'a envoyé",
     ecouteTexte:        "C'est le mot du joueur d'avant, joué à l'envers. Aucune idée de ce que c'est ? Normal.",
     ecouteClotureTitre: "Écoute le dernier mot (à l'envers)",
     imiteTitre:         "Imite-le à voix haute",
-    imiteTexte:         "Reproduis ce charabia du mieux que tu peux.",
+    imiteTexte:         "Reproduis cette... chose du mieux que tu peux.",
     imiteClotureTitre:  "Essaie de le reproduire à voix haute",
     reecouteTitre:      "Écoute ta tentative remise à l'endroit",
     reecouteTexte:      "Ton seul vrai indice sur ce qui a été dit au départ. Tends l'oreille.",
@@ -457,7 +457,7 @@ const TEXTES = {
 
   reveal: {
     surTitre:           "Révélation",
-    titre:              "Le grand écart",
+    titre:              "Le grand écart (JCVD is judging you)",
     introSolo:          "Une phrase est partie de main en main. Voilà les deux versions.",
     introChaines:       "{n} amorces sont parties dans la nature. Voilà ce qu'elles sont devenues.",
     chaineDe:           "Chaîne lancée par {nom}",
@@ -477,9 +477,9 @@ const TEXTES = {
     reseauIndisponible: "Impossible de charger le module réseau — vérifie ta connexion et recharge la page.",
     creationImpossible: "Impossible de créer le salon ({raison}). Réessaie.",
     connexionEnCours:   "Connexion au salon {code}…",
-    salonIntrouvable:   "Salon introuvable — vérifie le code, et que l'hôte a bien son onglet ouvert.",
+    salonIntrouvable:   "Salon introuvable, vérifie le code, et que l'hôte a bien son onglet ouvert.",
     hotePerdu:          "⚠️ On a perdu l'hôte… La partie s'arrête ici.",
-    microContexte:      "micro bloqué — ouvre le jeu via une adresse https (pas un fichier local)",
+    microContexte:      "micro bloqué, ouvre le jeu via une adresse https (pas un fichier local)",
     lectureImpossible:  "lecture du son impossible",
     rienAEcouter:       "Rien à écouter ici.",
     erreurGenerique:    "Erreur : "
