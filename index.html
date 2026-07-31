@@ -819,7 +819,6 @@ function hostBroadcast(json){
 
 /* --------- Gartic-style parallel chains (online mode) --------- */
 // P players -> P chains. Round r: player i plays on chain (i - r) mod P.
-// Closing round (r = P): each player decodes the END of their OWN chain.
 // P players -> P chains. The phrase length N (words per chain) is chosen by
 // the host and can exceed P: chains simply do several laps around the table.
 //   r = 0      : everyone seeds their OWN chain
